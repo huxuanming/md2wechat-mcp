@@ -1,0 +1,8 @@
+node_modules/
+src/
+tests/
+.cache/
+tsconfig.json
+.gitignore
+!dist/
+!dist/**
