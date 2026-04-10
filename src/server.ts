@@ -53,6 +53,29 @@ export function createServer(): McpServer {
 }
 
 export async function main(): Promise<void> {
+  if (process.argv.includes("--help") || process.argv.includes("-h")) {
+    process.stdout.write(`${SERVER_NAME} v${SERVER_VERSION}
+
+MCP server that converts Markdown to WeChat-friendly HTML.
+
+Tools:
+  convert_markdown_to_wechat_html  Convert Markdown to inline-styled HTML
+  list_wechat_themes               List available themes
+  open_wechat_html_in_browser      Open cached HTML in browser
+
+MCP config:
+  {
+    "mcpServers": {
+      "${SERVER_NAME}": {
+        "command": "npx",
+        "args": ["-y", "${SERVER_NAME}"]
+      }
+    }
+  }
+`);
+    process.exit(0);
+  }
+
   const server = createServer();
   const transport = new StdioServerTransport();
   await server.connect(transport);
