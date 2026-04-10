@@ -37,4 +37,45 @@ describe("parseMarkdown", () => {
     expect(firstH1).toBeLessThan(firstP);
     expect(html).toContain("外部标题");
   });
+
+  it("renders markdown tables", () => {
+    const md = ["| 名称 | 值 |", "| --- | --- |", "| A | 1 |", "| B | **2** |"].join("\n");
+    const html = parseMarkdown(md, "default");
+
+    expect(html).toContain("<table");
+    expect(html).toContain("<thead");
+    expect(html).toContain("<tbody");
+    expect(html).toContain("<th");
+    expect(html).toContain(">名称<");
+    expect(html).toContain(">A<");
+    expect(html).toContain("<strong");
+  });
+
+  it("applies column alignment from separator", () => {
+    const md = ["| 左 | 中 | 右 |", "| :--- | :---: | ---: |", "| a | b | c |"].join("\n");
+    const html = parseMarkdown(md, "default");
+
+    expect(html).toMatch(/<th[^>]*text-align: left[^>]*>左</);
+    expect(html).toMatch(/<th[^>]*text-align: center[^>]*>中</);
+    expect(html).toMatch(/<th[^>]*text-align: right[^>]*>右</);
+    expect(html).toMatch(/<td[^>]*text-align: left[^>]*>a</);
+    expect(html).toMatch(/<td[^>]*text-align: center[^>]*>b</);
+    expect(html).toMatch(/<td[^>]*text-align: right[^>]*>c</);
+  });
+
+  it("accepts single-dash separator", () => {
+    const md = ["| A | B |", "| :- | -: |", "| 1 | 2 |"].join("\n");
+    const html = parseMarkdown(md, "default");
+
+    expect(html).toContain("<table");
+    expect(html).toMatch(/<th[^>]*text-align: left[^>]*>A</);
+    expect(html).toMatch(/<th[^>]*text-align: right[^>]*>B</);
+  });
+
+  it("does not parse table when column count mismatches separator", () => {
+    const md = ["有竖线 | 但不是表格", "| --- | --- | --- |", "正文继续"].join("\n");
+    const html = parseMarkdown(md, "default");
+
+    expect(html).not.toContain("<table");
+  });
 });

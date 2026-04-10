@@ -1,16 +1,16 @@
 {
-  "name": "wechat-md-mcp-server",
+  "name": "md2wechat-mcp",
   "version": "0.1.0",
   "directories": {
     "test": "tests"
   },
   "scripts": {
     "test": "vitest run",
-    "build": "rm -rf dist && tsc -p tsconfig.json",
+    "build": "rm -rf dist && tsc -p tsconfig.build.json",
     "dev": "tsx src/server.ts",
     "start": "node dist/server.js",
     "test:watch": "vitest",
-    "build:check": "tsc -p tsconfig.json --noEmit",
+    "build:check": "tsc -p tsconfig.build.json --noEmit",
     "prepack": "chmod +x dist/server.js dist/cli.js dist/browser.js"
   },
   "keywords": [],
@@ -22,8 +22,8 @@
     "node": ">=20"
   },
   "bin": {
-    "wechat-md-mcp-server": "dist/server.js",
-    "wechat-md-convert": "dist/cli.js"
+    "md2wechat-mcp": "dist/server.js",
+    "md2wechat": "dist/cli.js"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",

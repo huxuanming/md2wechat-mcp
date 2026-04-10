@@ -12,6 +12,11 @@ export type Theme = {
   a: string;
   strong: string;
   em: string;
+  table: string;
+  thead: string;
+  tbody: string;
+  th: string;
+  td: string;
 };
 
 export const THEMES: Record<string, Theme> = {
@@ -28,7 +33,12 @@ export const THEMES: Record<string, Theme> = {
     hr: "border: none; border-top: 1px solid #d0d7de; margin: 1.2em 0;",
     a: "color: #0969da; text-decoration: none; border-bottom: 1px solid #9cc1ea;",
     strong: "font-weight: 700; color: #0f3b66;",
-    em: "font-style: italic; color: #2f5f8f;"
+    em: "font-style: italic; color: #2f5f8f;",
+    table: "width: 100%; border-collapse: collapse; margin: 1em 0; font-size: 0.95em;",
+    thead: "",
+    tbody: "",
+    th: "border: 1px solid #d0d7de; padding: 8px 10px; background: #f6f8fa; text-align: left; font-weight: 700;",
+    td: "border: 1px solid #d0d7de; padding: 8px 10px; text-align: left; vertical-align: top;"
   },
   tech: {
     article: "max-width: 860px; margin: 0 auto; color: #0f172a; font-size: 16px; line-height: 1.8;",
@@ -43,7 +53,12 @@ export const THEMES: Record<string, Theme> = {
     hr: "border: none; border-top: 1px solid #cbd5e1; margin: 1.15em 0;",
     a: "color: #0369a1; text-decoration: none; border-bottom: 1px solid #7dd3fc;",
     strong: "font-weight: 700; color: #1d4ed8;",
-    em: "font-style: italic; color: #0c4a6e;"
+    em: "font-style: italic; color: #0c4a6e;",
+    table: "width: 100%; border-collapse: collapse; margin: 1em 0; font-size: 0.95em;",
+    thead: "",
+    tbody: "",
+    th: "border: 1px solid #cbd5e1; padding: 8px 10px; background: #f8fafc; text-align: left; font-weight: 700;",
+    td: "border: 1px solid #cbd5e1; padding: 8px 10px; text-align: left; vertical-align: top;"
   },
   warm: {
     article: "max-width: 860px; margin: 0 auto; color: #3b2f2f; font-size: 16px; line-height: 1.82;",
@@ -58,7 +73,12 @@ export const THEMES: Record<string, Theme> = {
     hr: "border: none; border-top: 1px solid #f3d3b0; margin: 1.2em 0;",
     a: "color: #b45309; text-decoration: none; border-bottom: 1px solid #f2b874;",
     strong: "font-weight: 700; color: #9a3412;",
-    em: "font-style: italic; color: #92400e;"
+    em: "font-style: italic; color: #92400e;",
+    table: "width: 100%; border-collapse: collapse; margin: 1em 0; font-size: 0.95em;",
+    thead: "",
+    tbody: "",
+    th: "border: 1px solid #f3d3b0; padding: 8px 10px; background: #fff8ef; text-align: left; font-weight: 700;",
+    td: "border: 1px solid #f3d3b0; padding: 8px 10px; text-align: left; vertical-align: top;"
   },
   apple: {
     article: "max-width: 820px; margin: 0 auto; color: #1d1d1f; font-size: 17px; line-height: 1.82; letter-spacing: 0.01em;",
@@ -73,7 +93,12 @@ export const THEMES: Record<string, Theme> = {
     hr: "border: none; border-top: 1px solid #e5e5ea; margin: 1.35em 0;",
     a: "color: #0066cc; text-decoration: none;",
     strong: "font-weight: 700; color: #1d1d1f;",
-    em: "font-style: italic; color: #3a3a3c;"
+    em: "font-style: italic; color: #3a3a3c;",
+    table: "width: 100%; border-collapse: collapse; margin: 1em 0; font-size: 0.95em;",
+    thead: "",
+    tbody: "",
+    th: "border: 1px solid #e5e5ea; padding: 8px 10px; background: #f5f5f7; text-align: left; font-weight: 700;",
+    td: "border: 1px solid #e5e5ea; padding: 8px 10px; text-align: left; vertical-align: top;"
   },
   "wechat-native": {
     article:
@@ -91,7 +116,12 @@ export const THEMES: Record<string, Theme> = {
     hr: "margin: 36px auto; border: none; height: 2px; width: 62%; background: linear-gradient(90deg, rgba(7,193,96,0) 0%, rgba(7,193,96,0.22) 20%, rgba(7,193,96,0.68) 50%, rgba(7,193,96,0.22) 80%, rgba(7,193,96,0) 100%);",
     a: "color: #067647; text-decoration: none; border-bottom: 1px solid rgba(7,193,96,0.45);",
     strong: "font-weight: 700; color: #067647; background: linear-gradient(180deg, rgba(7,193,96,0) 0%, rgba(7,193,96,0) 58%, rgba(7,193,96,0.16) 58%, rgba(7,193,96,0.16) 100%); padding: 0 3px;",
-    em: "font-style: italic; color: #666666;"
+    em: "font-style: italic; color: #666666;",
+    table: "width: 100%; border-collapse: collapse; margin: 1em 0; font-size: 0.95em;",
+    thead: "",
+    tbody: "",
+    th: "border: 1px solid #cde8db; padding: 8px 10px; background: #f3fbf7; text-align: left; font-weight: 700; color: #067647;",
+    td: "border: 1px solid #cde8db; padding: 8px 10px; text-align: left; vertical-align: top;"
   }
 };
 

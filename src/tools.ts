@@ -2,6 +2,7 @@ import { parseMarkdown } from "./markdown.js";
 import { saveHtmlCache } from "./cache.js";
 import { openFileInBrowser } from "./browser.js";
 import { THEME_NAMES, THEMES } from "./themes.js";
+import { readFile } from "node:fs/promises";
 
 export type TextContent = { type: "text"; text: string };
 
@@ -36,6 +37,10 @@ function validateMarkdown(markdown: unknown): markdown is string {
   return typeof markdown === "string" && markdown.trim().length > 0;
 }
 
+function validateMarkdownPath(path: unknown): path is string {
+  return typeof path === "string" && path.trim().length > 0;
+}
+
 function validateCachePath(path: unknown): path is string {
   return typeof path === "string" && path.trim().length > 0;
 }
@@ -48,10 +53,38 @@ export async function handleToolCall(name: string, args: Record<string, unknown>
   }
 
   if (name === "convert_markdown_to_wechat_html") {
-    const markdown = args.markdown;
+    const directMarkdown = args.markdown;
+    const markdownPath = args.markdown_path;
+
+    let markdown: string | undefined;
+    if (directMarkdown !== undefined) {
+      if (!validateMarkdown(directMarkdown)) {
+        return {
+          content: [{ type: "text", text: "markdown must be a non-empty string when provided." }],
+          isError: true
+        };
+      }
+      markdown = directMarkdown;
+    } else if (validateMarkdownPath(markdownPath)) {
+      try {
+        markdown = await readFile(markdownPath, "utf8");
+      } catch (error) {
+        return {
+          content: [{ type: "text", text: `Failed to read markdown_path: ${(error as Error).message}` }],
+          isError: true
+        };
+      }
+      if (!validateMarkdown(markdown)) {
+        return {
+          content: [{ type: "text", text: "markdown_path points to an empty markdown file." }],
+          isError: true
+        };
+      }
+    }
+
     if (!validateMarkdown(markdown)) {
       return {
-        content: [{ type: "text", text: "markdown is required and must be a non-empty string." }],
+        content: [{ type: "text", text: "Provide one markdown source: markdown or markdown_path." }],
         isError: true
       };
     }

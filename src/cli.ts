@@ -18,7 +18,7 @@ function validateTheme(theme: string): string {
 export async function main(argv: string[] = process.argv): Promise<number> {
   const program = new Command();
   program
-    .name("wechat-md-convert")
+    .name("md2wechat")
     .description("Convert Markdown to WeChat HTML.")
     .argument("<input>", "Input markdown file path")
     .option("--theme <theme>", "Rendering theme", "default")

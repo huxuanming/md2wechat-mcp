@@ -43,6 +43,30 @@ export function inlineFormat(text: string, theme: Theme): string {
   return escaped;
 }
 
+function splitTableRow(line: string): string[] {
+  const trimmed = line.trim();
+  const normalized = trimmed.replace(/^\|/, "").replace(/\|$/, "");
+  return normalized.split("|").map((cell) => cell.trim());
+}
+
+function isTableSeparatorLine(line: string): boolean {
+  const cells = splitTableRow(line);
+  if (cells.length === 0) {
+    return false;
+  }
+  return cells.every((cell) => /^:?-+:?$/u.test(cell));
+}
+
+function parseColumnAlignment(cell: string): "left" | "right" | "center" | null {
+  const trimmed = cell.trim();
+  const hasLeft = trimmed.startsWith(":");
+  const hasRight = trimmed.endsWith(":");
+  if (hasLeft && hasRight) return "center";
+  if (hasRight) return "right";
+  if (hasLeft) return "left";
+  return null;
+}
+
 export function parseMarkdown(md: string, themeName = "default", title?: string): string {
   const theme = THEMES[themeName] ?? THEMES.default;
   const lines = md.replaceAll("\r\n", "\n").split("\n");
@@ -93,7 +117,8 @@ export function parseMarkdown(md: string, themeName = "default", title?: string)
     codeLines = [];
   };
 
-  for (const raw of lines) {
+  for (let i = 0; i < lines.length; i += 1) {
+    const raw = lines[i] ?? "";
     const line = raw.replace(/\s+$/u, "");
 
     const codeFence = line.match(/^```(.*)$/u);
@@ -152,6 +177,58 @@ export function parseMarkdown(md: string, themeName = "default", title?: string)
       flushList();
       out.push(`<blockquote style=\"${theme.blockquote}\">${inlineFormat(quote[1] ?? "", theme)}</blockquote>`);
       continue;
+    }
+
+    const nextLineRaw = lines[i + 1];
+    const nextLine = typeof nextLineRaw === "string" ? nextLineRaw.replace(/\s+$/u, "") : "";
+    if (line.includes("|") && isTableSeparatorLine(nextLine)) {
+      const headers = splitTableRow(line);
+      const sepCells = splitTableRow(nextLine);
+      if (headers.length === sepCells.length) {
+        flushParagraph();
+        flushList();
+
+        const alignments = sepCells.map(parseColumnAlignment);
+        const rows: string[][] = [];
+        i += 2;
+        while (i < lines.length) {
+          const rowRaw = lines[i] ?? "";
+          const rowLine = rowRaw.replace(/\s+$/u, "");
+          if (!rowLine.trim() || !rowLine.includes("|")) {
+            i -= 1;
+            break;
+          }
+          rows.push(splitTableRow(rowLine));
+          i += 1;
+        }
+
+        const headerHtml = headers
+          .map((header, index) => {
+            const align = alignments[index];
+            const style = align ? `${theme.th} text-align: ${align};` : theme.th;
+            return `<th style=\"${style}\">${inlineFormat(header, theme)}</th>`;
+          })
+          .join("");
+
+        const bodyHtml = rows
+          .map((row) => {
+            const cells = headers.map((_, index) => row[index] ?? "");
+            const cellHtml = cells
+              .map((cell, index) => {
+                const align = alignments[index];
+                const style = align ? `${theme.td} text-align: ${align};` : theme.td;
+                return `<td style=\"${style}\">${inlineFormat(cell, theme)}</td>`;
+              })
+              .join("");
+            return `<tr>${cellHtml}</tr>`;
+          })
+          .join("");
+
+        out.push(
+          `<table style=\"${theme.table}\"><thead style=\"${theme.thead}\"><tr>${headerHtml}</tr></thead><tbody style=\"${theme.tbody}\">${bodyHtml}</tbody></table>`
+        );
+        continue;
+      }
     }
 
     const ul = line.match(/^\s*[-*+]\s+(.+)$/u);

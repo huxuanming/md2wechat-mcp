@@ -5,6 +5,8 @@
 - `list_wechat_themes`: 返回可用主题。
 - `open_wechat_html_in_browser`: 接收 `cacheHtmlPath` 直接打开，方便手动 `Cmd+A` / `Cmd+C`。
 
+当前已支持常见 Markdown 语法（标题、段落、列表、引用、代码块、链接、强调）以及 GFM 风格表格。
+
 转换成功后会自动缓存一份 HTML 到：
 - `./.cache/wechat-mcp/`
 
@@ -28,12 +30,27 @@ node dist/cli.js ./input.md --theme default
 
 ## MCP 配置示例
 
+**npx（无需本地安装）：**
+
 ```json
 {
   "mcpServers": {
-    "wechat-md-mcp-server": {
+    "md2wechat-mcp": {
+      "command": "npx",
+      "args": ["-y", "md2wechat-mcp"]
+    }
+  }
+}
+```
+
+**本地路径：**
+
+```json
+{
+  "mcpServers": {
+    "md2wechat-mcp": {
       "command": "node",
-      "args": ["/absolute/path/to/wechat-md-mcp-server-node/dist/server.js"]
+      "args": ["/absolute/path/to/md2wechat-mcp/dist/server.js"]
     }
   }
 }
@@ -43,9 +60,14 @@ node dist/cli.js ./input.md --theme default
 
 ### 1) `convert_markdown_to_wechat_html`
 输入：
-- `markdown` (string, required)
+- `markdown` (string, optional): 直接传 Markdown 内容
+- `markdown_path` (string, optional): 传本地 Markdown 文件路径（避免整篇内容走 token）
 - `theme` (string, optional): `default | tech | warm | apple | wechat-native`
 - `title` (string, optional)
+
+规则：
+- `markdown` 和 `markdown_path` 二选一
+- 如果两者都传，优先使用 `markdown`
 
 输出：
 - `text` 内容为 HTML 字符串（`<article>...</article>`）
@@ -65,7 +87,7 @@ node dist/cli.js ./input.md --theme default
 
 ## CLI 参数
 
-`wechat-md-convert <input> [options]`
+`md2wechat <input> [options]`
 - `--theme <theme>`
 - `--title <title>`
 - `--out <path>`

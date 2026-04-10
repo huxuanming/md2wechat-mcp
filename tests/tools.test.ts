@@ -1,4 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 const { openFileInBrowser } = vi.hoisted(() => ({
   openFileInBrowser: vi.fn().mockResolvedValue(undefined)
@@ -32,12 +35,51 @@ describe("tools", () => {
     expect(result.isError).toBe(true);
   });
 
+  it("returns error when both markdown sources are missing", async () => {
+    const result = await handleToolCall("convert_markdown_to_wechat_html", {});
+    expect(result.isError).toBe(true);
+    expect(result.content[0]?.text).toContain("Provide one markdown source");
+  });
+
   it("returns html and cache path for html conversion", async () => {
     const result = await handleToolCall("convert_markdown_to_wechat_html", { markdown: "# Hi", theme: "default" });
     expect(result.isError).not.toBe(true);
     expect(result.content[0]?.type).toBe("text");
     expect(result.content[0]?.text).toContain("<article");
     expect((result as { meta?: { cacheHtmlPath?: string } }).meta?.cacheHtmlPath).toBeTruthy();
+  });
+
+  it("reads markdown from markdown_path", async () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "wechat-md-tools-"));
+    const inputPath = join(tempDir, "input.md");
+    writeFileSync(inputPath, "# FromFile", "utf8");
+
+    try {
+      const result = await handleToolCall("convert_markdown_to_wechat_html", { markdown_path: inputPath, theme: "default" });
+      expect(result.isError).not.toBe(true);
+      expect(result.content[0]?.text).toContain("FromFile");
+    } finally {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it("prioritizes markdown when markdown and markdown_path are both provided", async () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "wechat-md-tools-"));
+    const inputPath = join(tempDir, "input.md");
+    writeFileSync(inputPath, "# FromFile", "utf8");
+
+    try {
+      const result = await handleToolCall("convert_markdown_to_wechat_html", {
+        markdown: "# FromArg",
+        markdown_path: inputPath,
+        theme: "default"
+      });
+      expect(result.isError).not.toBe(true);
+      expect(result.content[0]?.text).toContain("FromArg");
+      expect(result.content[0]?.text).not.toContain("FromFile");
+    } finally {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
   });
 
   it("opens provided cache path directly", async () => {

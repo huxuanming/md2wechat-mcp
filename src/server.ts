@@ -4,9 +4,10 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import { handleToolCall } from "./tools.js";
+import pkg from "../package.json" with { type: "json" };
 
-const SERVER_NAME = "wechat-md-mcp-server";
-const SERVER_VERSION = "0.1.0";
+const SERVER_NAME = pkg.name;
+const SERVER_VERSION = pkg.version;
 
 const themeSchema = z.enum(["default", "tech", "warm", "apple", "wechat-native"]);
 
@@ -18,7 +19,8 @@ export function createServer(): McpServer {
     {
       description: "Convert Markdown to WeChat-friendly HTML with inline styles for copy/paste publishing workflows.",
       inputSchema: {
-        markdown: z.string().describe("Source markdown text"),
+        markdown: z.string().optional().describe("Source markdown text. If both markdown and markdown_path are provided, markdown is used."),
+        markdown_path: z.string().optional().describe("Local markdown file path. Use this to avoid sending full content through tokens."),
         theme: themeSchema.optional().default("default").describe("Theme name: default | tech | warm | apple | wechat-native"),
         title: z.string().optional().describe("Optional article title rendered as h1")
       }

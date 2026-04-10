@@ -2,6 +2,7 @@ node_modules/
 src/
 tests/
 .cache/
+.claude
 tsconfig.json
 .gitignore
 !dist/

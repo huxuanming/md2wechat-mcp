@@ -22,7 +22,7 @@ describe("cli", () => {
 
     expect(proc.status).toBe(0);
     expect(proc.stdout.toLowerCase()).toContain("usage");
-    expect(proc.stdout).toContain("wechat-md-convert");
+    expect(proc.stdout).toContain("md2wechat");
     expect(proc.stdout).not.toContain("--copy");
   });
 
