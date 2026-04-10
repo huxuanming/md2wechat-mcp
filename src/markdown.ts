@@ -24,6 +24,11 @@ export function inlineFormat(text: string, theme: Theme): string {
     return stash(`<code style=\"${theme.code_inline}\">${code}</code>`);
   });
 
+  // Images must be processed before links (pattern starts with `!`)
+  escaped = escaped.replace(/!\[([^\]]*)\]\((https?:\/\/[^\s)]+)\)/g, (_m, alt: string, src: string) => {
+    return stash(`<img src=\"${src}\" alt=\"${alt}\" style=\"max-width:100%;height:auto;display:block;margin:0.8em auto;\" />`);
+  });
+
   escaped = escaped.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (_m, label: string, href: string) => {
     return `<a href=\"${href}\" style=\"${theme.a}\">${label}</a>`;
   });
@@ -82,6 +87,8 @@ export function parseMarkdown(md: string, themeName = "default", title?: string)
 
   let listType: "ul" | "ol" | undefined;
   let listItems: string[] = [];
+  let olStart = 1;
+  let olNextExpected: number | undefined;
 
   let paragraphBuffer: string[] = [];
 
@@ -98,7 +105,14 @@ export function parseMarkdown(md: string, themeName = "default", title?: string)
   const flushList = (): void => {
     if (listType && listItems.length > 0) {
       const renderedItems = listItems.map((item) => `<li style=\"${theme.li}\">${item}</li>`).join("");
-      out.push(`<${listType} style=\"margin: 0.6em 0 0.9em 1.2em; padding: 0;\">${renderedItems}</${listType}>`);
+      if (listType === "ol") {
+        const startAttr = olStart !== 1 ? ` start=\"${olStart}\"` : "";
+        out.push(`<ol${startAttr} style=\"margin: 0.6em 0 0.9em 1.2em; padding: 0;\">${renderedItems}</ol>`);
+        olNextExpected = olStart + listItems.length;
+      } else {
+        out.push(`<ul style=\"margin: 0.6em 0 0.9em 1.2em; padding: 0;\">${renderedItems}</ul>`);
+        olNextExpected = undefined;
+      }
     }
     listType = undefined;
     listItems = [];
@@ -242,14 +256,24 @@ export function parseMarkdown(md: string, themeName = "default", title?: string)
       continue;
     }
 
-    const ol = line.match(/^\s*\d+\.\s+(.+)$/u);
+    const ol = line.match(/^\s*(\d+)\.\s+(.+)$/u);
     if (ol) {
       flushParagraph();
+      const itemNum = parseInt(ol[1], 10);
       if (listType && listType !== "ol") {
         flushList();
       }
+      if (listType !== "ol") {
+        // Starting a new ol group: check if this continues a previous flushed group
+        if (olNextExpected !== undefined && itemNum === olNextExpected) {
+          olStart = itemNum;
+        } else {
+          olStart = itemNum;
+          olNextExpected = undefined;
+        }
+      }
       listType = "ol";
-      listItems.push(inlineFormat(ol[1], theme));
+      listItems.push(inlineFormat(ol[2], theme));
       continue;
     }
 
