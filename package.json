@@ -1,6 +1,6 @@
 {
   "name": "md2wechat-mcp",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "directories": {
     "test": "tests"
   },
@@ -11,7 +11,7 @@
     "start": "node dist/server.js",
     "test:watch": "vitest",
     "build:check": "tsc -p tsconfig.build.json --noEmit",
-    "prepack": "chmod +x dist/server.js dist/cli.js dist/browser.js"
+    "prepack": "npm run build && chmod +x dist/server.js dist/cli.js dist/browser.js"
   },
   "keywords": [],
   "author": "",

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, realpathSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { Command } from "commander";
 import { parseMarkdown } from "./markdown.js";
@@ -51,7 +51,7 @@ export async function main(argv: string[] = process.argv): Promise<number> {
   return 0;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (import.meta.url === `file://${realpathSync(process.argv[1])}`) {
   main().catch((error) => {
     console.error(error instanceof Error ? error.message : String(error));
     process.exit(1);

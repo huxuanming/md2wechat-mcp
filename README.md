@@ -1,4 +1,4 @@
-# 微信 Markdown 转换 MCP (Node.js)
+# 微信 Markdown 转换 MCP
 
 这个 MCP 服务提供三个工具：
 - `convert_markdown_to_wechat_html`: 把 Markdown 转成可用于公众号排版流程的内联样式 HTML。

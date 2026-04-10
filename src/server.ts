@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { realpathSync } from "node:fs";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
@@ -57,7 +58,7 @@ export async function main(): Promise<void> {
   await server.connect(transport);
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (import.meta.url === `file://${realpathSync(process.argv[1])}`) {
   main().catch((error) => {
     console.error("Server error:", error);
     process.exit(1);
