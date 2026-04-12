@@ -186,12 +186,12 @@ describe("tools", () => {
     expect(result.content[0]?.text).toContain("access_token is required");
   });
 
-  it("validates required article_title for wechat_markdown_to_draft", async () => {
+  it("requires article_title only when no h1 and no markdown_path fallback are available", async () => {
     const result = await handleToolCall("wechat_markdown_to_draft", {
       access_token: "token",
-      markdown: "# Hello"
+      markdown: "Hello"
     });
     expect(result.isError).toBe(true);
-    expect(result.content[0]?.text).toContain("article_title is required");
+    expect(result.content[0]?.text).toContain("article_title is required when markdown has no leading H1");
   });
 });

@@ -148,7 +148,7 @@ export function createServer(): McpServer {
       description: "One-shot tool: convert markdown to WeChat HTML and create draft. Cover is handled automatically (title=封面 preferred, else first local JPG/JPEG).",
       inputSchema: {
         access_token: z.string().describe("WeChat API access token from wechat_get_access_token"),
-        article_title: z.string().describe("Draft article title"),
+        article_title: z.string().optional().describe("Draft article title. Fallback: first markdown H1, then markdown file name."),
         markdown: z.string().optional().describe("Source markdown text. If both markdown and markdown_path are provided, markdown is used."),
         markdown_path: z.string().optional().describe("Local markdown file path"),
         theme: themeSchema.optional().default("default").describe("Theme name: default | tech | warm | apple | wechat-native"),

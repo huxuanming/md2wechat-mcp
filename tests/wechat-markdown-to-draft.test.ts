@@ -1,4 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 const apiMocks = vi.hoisted(() => ({
   getAccessToken: vi.fn(),
@@ -192,5 +195,38 @@ describe("wechat_markdown_to_draft", () => {
     const [, articlesArg] = apiMocks.draftAdd.mock.calls[0] as [string, Array<Record<string, unknown>>];
     const html = String(articlesArg[0]?.content);
     expect(html).toContain("font-size: 13.5px");
+  });
+
+  it("falls back to first markdown h1 when article_title is omitted", async () => {
+    apiMocks.draftAdd.mockResolvedValue({ media_id: "draft_10" });
+
+    const result = await handleToolCall("wechat_markdown_to_draft", {
+      access_token: "token",
+      markdown: "# 来自H1的标题\n\n正文"
+    });
+
+    expect(result.isError).not.toBe(true);
+    const [, articlesArg] = apiMocks.draftAdd.mock.calls[0] as [string, Array<Record<string, unknown>>];
+    expect(articlesArg[0]?.title).toBe("来自H1的标题");
+  });
+
+  it("falls back to markdown file name when article_title and h1 are both missing", async () => {
+    apiMocks.draftAdd.mockResolvedValue({ media_id: "draft_11" });
+    const tempDir = mkdtempSync(join(tmpdir(), "wechat-md-draft-title-"));
+    const filePath = join(tempDir, "fallback-title-file.md");
+    writeFileSync(filePath, "正文无H1", "utf8");
+
+    try {
+      const result = await handleToolCall("wechat_markdown_to_draft", {
+        access_token: "token",
+        markdown_path: filePath
+      });
+
+      expect(result.isError).not.toBe(true);
+      const [, articlesArg] = apiMocks.draftAdd.mock.calls[0] as [string, Array<Record<string, unknown>>];
+      expect(articlesArg[0]?.title).toBe("fallback-title-file");
+    } finally {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
   });
 });

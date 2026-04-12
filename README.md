@@ -169,7 +169,7 @@ node dist/cli.js ./input.md --theme default
 
 输入（核心）：
 - `access_token` (string, required)
-- `article_title` (string, required)
+- `article_title` (string, optional)：草稿标题。未传时按“首个一级标题（H1）→ 文件名（去扩展名）”自动推断
 - `markdown` 或 `markdown_path` (至少一个)
 
 输入（可选）：

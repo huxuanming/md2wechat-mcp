@@ -3,7 +3,7 @@ import { saveHtmlCache } from "./cache.js";
 import { openFileInBrowser } from "./browser.js";
 import { THEME_NAMES, THEMES, type FontSizePreset } from "./themes.js";
 import { readFile } from "node:fs/promises";
-import { dirname, extname, resolve } from "node:path";
+import { basename, dirname, extname, resolve } from "node:path";
 import {
   getAccessToken,
   draftAdd,
@@ -406,6 +406,58 @@ function removeLeadingAtxH1(markdown: string): string {
   return lines.join("\n");
 }
 
+function extractLeadingAtxH1(markdown: string): string | undefined {
+  const normalized = markdown.replace(/^\uFEFF/, "").replaceAll("\r\n", "\n");
+  const lines = normalized.split("\n");
+
+  let index = 0;
+  while (index < lines.length && !lines[index]?.trim()) {
+    index += 1;
+  }
+
+  if (lines[index]?.trim() === "---") {
+    index += 1;
+    while (index < lines.length && lines[index]?.trim() !== "---") {
+      index += 1;
+    }
+    if (index < lines.length) {
+      index += 1;
+    }
+  }
+
+  while (index < lines.length && !lines[index]?.trim()) {
+    index += 1;
+  }
+
+  const line = lines[index];
+  const match = line?.match(/^\s{0,3}#\s+(.+?)\s*#*\s*$/u);
+  return match?.[1]?.trim() || undefined;
+}
+
+function inferArticleTitle(
+  rawArticleTitle: unknown,
+  markdown: string,
+  markdownPath?: string
+): string | undefined {
+  if (typeof rawArticleTitle === "string" && rawArticleTitle.trim()) {
+    return rawArticleTitle.trim();
+  }
+
+  const headingTitle = extractLeadingAtxH1(markdown);
+  if (headingTitle) {
+    return headingTitle;
+  }
+
+  if (typeof markdownPath === "string" && markdownPath.trim()) {
+    const base = basename(markdownPath.trim(), extname(markdownPath.trim())).trim();
+    if (base) {
+      return base;
+    }
+  }
+
+  return undefined;
+}
+
 async function resolveMarkdownSource(args: Record<string, unknown>): Promise<{ markdown: string; markdownPath?: string } | ToolResult> {
   const directMarkdown = args.markdown;
   const markdownPath = args.markdown_path;
@@ -626,7 +678,7 @@ export async function handleToolCall(name: string, args: Record<string, unknown>
 
   if (name === "wechat_markdown_to_draft") {
     const accessToken = args.access_token;
-    const articleTitle = args.article_title;
+    const rawArticleTitle = args.article_title;
     const author = typeof args.author === "string" ? args.author : undefined;
     const digest = typeof args.digest === "string" ? args.digest : undefined;
     const contentSourceUrl = typeof args.content_source_url === "string" ? args.content_source_url : undefined;
@@ -636,9 +688,6 @@ export async function handleToolCall(name: string, args: Record<string, unknown>
 
     if (typeof accessToken !== "string" || !accessToken.trim()) {
       return { content: [{ type: "text", text: "access_token is required." }], isError: true };
-    }
-    if (typeof articleTitle !== "string" || !articleTitle.trim()) {
-      return { content: [{ type: "text", text: "article_title is required." }], isError: true };
     }
     if (needOpenComment !== undefined && needOpenComment !== 0 && needOpenComment !== 1) {
       return { content: [{ type: "text", text: "need_open_comment must be 0 or 1." }], isError: true };
@@ -651,6 +700,15 @@ export async function handleToolCall(name: string, args: Record<string, unknown>
     if (isToolResult(source)) {
       return source;
     }
+
+    const articleTitle = inferArticleTitle(rawArticleTitle, source.markdown, source.markdownPath);
+    if (!articleTitle) {
+      return {
+        content: [{ type: "text", text: "article_title is required when markdown has no leading H1 and markdown_path is unavailable." }],
+        isError: true
+      };
+    }
+
     let markdownForConvert = source.markdown;
     const markdownPath = source.markdownPath;
     const baseDir = markdownPath ? dirname(markdownPath) : process.cwd();
