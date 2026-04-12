@@ -17,7 +17,7 @@ export function ensureCacheDir(cwd?: string): string {
   const candidates = [
     process.env.WECHAT_MCP_CACHE_DIR,
     join(baseDir, ".cache", "wechat-mcp"),
-    join(process.cwd(), ".cache", "wechat-mcp"),
+    baseDir !== process.cwd() ? join(process.cwd(), ".cache", "wechat-mcp") : undefined,
     xdgCache ? join(resolve(xdgCache), "wechat-mcp") : undefined,
     process.platform === "darwin" ? join(homedir(), "Library", "Caches", "wechat-mcp") : join(homedir(), ".cache", "wechat-mcp"),
     join(tmpdir(), "wechat-mcp")
@@ -41,8 +41,9 @@ export function saveHtmlCache(html: string, cwd?: string, cacheDir?: string): st
   const finalDir = cacheDir ? resolve(cacheDir) : ensureCacheDir(cwd);
   mkdirSync(finalDir, { recursive: true });
   const now = new Date();
-  const stamp = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}-${String(now.getHours()).padStart(2, "0")}${String(now.getMinutes()).padStart(2, "0")}${String(now.getSeconds()).padStart(2, "0")}`;
-  const filePath = join(finalDir, `wechat-${stamp}.html`);
+  const stamp = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}-${String(now.getHours()).padStart(2, "0")}${String(now.getMinutes()).padStart(2, "0")}${String(now.getSeconds()).padStart(2, "0")}${String(now.getMilliseconds()).padStart(3, "0")}`;
+  const randomSuffix = Math.random().toString(36).slice(2, 8);
+  const filePath = join(finalDir, `wechat-${stamp}-${randomSuffix}.html`);
   writeFileSync(filePath, html, "utf8");
   return filePath;
 }

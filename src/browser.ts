@@ -1,4 +1,5 @@
 import { execFile } from "node:child_process";
+import { access } from "node:fs/promises";
 import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
@@ -19,6 +20,7 @@ export async function openFileInBrowser(
   filePath: string,
   runner: (command: string, args: string[]) => Promise<unknown> = (command, args) => execFileAsync(command, args)
 ): Promise<void> {
+  await access(filePath);
   const { command, args } = getBrowserCommand(filePath);
   await runner(command, args);
 }

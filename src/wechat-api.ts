@@ -2,6 +2,16 @@ import { readFile } from "node:fs/promises";
 import { basename, extname } from "node:path";
 
 const WECHAT_BASE = "https://api.weixin.qq.com";
+const DEFAULT_WECHAT_TIMEOUT_MS = 15000;
+
+function getWechatTimeoutMs(): number {
+  const raw = process.env.WECHAT_API_TIMEOUT_MS;
+  const parsed = raw ? Number.parseInt(raw, 10) : NaN;
+  if (Number.isFinite(parsed) && parsed > 0) {
+    return parsed;
+  }
+  return DEFAULT_WECHAT_TIMEOUT_MS;
+}
 
 export interface WechatArticle {
   article_type?: "news" | "newspic";
@@ -16,7 +26,22 @@ export interface WechatArticle {
 }
 
 async function wechatFetch<T>(url: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(url, options);
+  const controller = new AbortController();
+  const timeoutMs = getWechatTimeoutMs();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  let res: Response;
+  try {
+    res = await fetch(url, { ...options, signal: controller.signal });
+  } catch (error) {
+    if ((error as Error).name === "AbortError") {
+      throw new Error(`WeChat API request timeout after ${timeoutMs}ms`);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timer);
+  }
+
   if (!res.ok) {
     throw new Error(`HTTP ${res.status}: ${res.statusText}`);
   }
@@ -91,6 +116,53 @@ export async function uploadImage(accessToken: string, filePath: string): Promis
   const mimeType = ext === ".png" ? "image/png" : "image/jpeg";
   const form = new FormData();
   form.append("media", new Blob([fileBuffer], { type: mimeType }), basename(filePath));
+  return wechatFetch(url, { method: "POST", body: form });
+}
+
+export type PermanentMaterialType = "image" | "voice" | "video" | "thumb";
+
+export interface MaterialDescription {
+  title?: string;
+  introduction?: string;
+}
+
+export interface AddMaterialResult {
+  media_id: string;
+  url?: string;
+}
+
+function getMimeTypeByExtension(filePath: string): string {
+  const ext = extname(filePath).toLowerCase();
+  const map: Record<string, string> = {
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".png": "image/png",
+    ".gif": "image/gif",
+    ".bmp": "image/bmp",
+    ".mp3": "audio/mpeg",
+    ".wma": "audio/x-ms-wma",
+    ".wav": "audio/wav",
+    ".amr": "audio/amr",
+    ".mp4": "video/mp4"
+  };
+  return map[ext] ?? "application/octet-stream";
+}
+
+export async function addMaterial(
+  accessToken: string,
+  type: PermanentMaterialType,
+  filePath: string,
+  description?: MaterialDescription
+): Promise<AddMaterialResult> {
+  const url = `${WECHAT_BASE}/cgi-bin/material/add_material?access_token=${encodeURIComponent(accessToken)}&type=${encodeURIComponent(type)}`;
+  const fileBuffer = await readFile(filePath);
+  const form = new FormData();
+  form.append("media", new Blob([fileBuffer], { type: getMimeTypeByExtension(filePath) }), basename(filePath));
+
+  if (type === "video" && description) {
+    form.append("description", JSON.stringify(description));
+  }
+
   return wechatFetch(url, { method: "POST", body: form });
 }
 
