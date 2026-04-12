@@ -15,6 +15,13 @@ function validateTheme(theme: string): string {
   throw new Error(`Invalid theme: ${theme}. Available: ${[...THEME_NAMES].sort().join(", ")}`);
 }
 
+function validateFontSizePreset(value: string): "small" | "medium" | "large" {
+  if (value === "small" || value === "medium" || value === "large") {
+    return value;
+  }
+  throw new Error(`Invalid font size preset: ${value}. Available: small, medium, large`);
+}
+
 export async function main(argv: string[] = process.argv): Promise<number> {
   const program = new Command();
   program
@@ -23,6 +30,7 @@ export async function main(argv: string[] = process.argv): Promise<number> {
     .argument("<input>", "Input markdown file path")
     .option("--theme <theme>", "Rendering theme", "default")
     .option("--title <title>", "Optional title override")
+    .option("--font-size-preset <preset>", "Font size preset: small | medium | large", "medium")
     .option("--out <path>", "Optional output html path; if omitted, use .cache/wechat-mcp")
     .option("--cache-dir <path>", "Override cache directory (or set WECHAT_MCP_CACHE_DIR).")
     .showHelpAfterError();
@@ -31,10 +39,11 @@ export async function main(argv: string[] = process.argv): Promise<number> {
 
   const inputPath = resolve(program.args[0]);
   const markdown = readFileSync(inputPath, "utf8");
-  const opts = program.opts<{ theme: string; title?: string; out?: string; cacheDir?: string }>();
+  const opts = program.opts<{ theme: string; title?: string; fontSizePreset: string; out?: string; cacheDir?: string }>();
   const theme = validateTheme(opts.theme);
+  const fontSizePreset = validateFontSizePreset(opts.fontSizePreset);
 
-  const html = parseMarkdown(markdown, theme, opts.title);
+  const html = parseMarkdown(markdown, theme, opts.title, fontSizePreset);
 
   let outputPath: string;
   if (opts.out) {
@@ -47,6 +56,7 @@ export async function main(argv: string[] = process.argv): Promise<number> {
 
   process.stdout.write(`Input: ${inputPath}\n`);
   process.stdout.write(`Theme: ${theme}\n`);
+  process.stdout.write(`Font size preset: ${fontSizePreset}\n`);
   process.stdout.write(`Output: ${outputPath}\n`);
   return 0;
 }

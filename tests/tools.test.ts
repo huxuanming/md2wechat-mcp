@@ -30,6 +30,15 @@ describe("tools", () => {
     expect(result.content[0]?.text).toContain("Invalid theme");
   });
 
+  it("returns error for invalid font_size_preset", async () => {
+    const result = await handleToolCall("convert_markdown_to_wechat_html", {
+      markdown: "# Hi",
+      font_size_preset: "huge"
+    });
+    expect(result.isError).toBe(true);
+    expect(result.content[0]?.text).toContain("Invalid font_size_preset");
+  });
+
   it("returns error for empty markdown", async () => {
     const result = await handleToolCall("convert_markdown_to_wechat_html", { markdown: "" });
     expect(result.isError).toBe(true);
@@ -46,18 +55,42 @@ describe("tools", () => {
     expect(result.isError).not.toBe(true);
     expect(result.content[0]?.type).toBe("text");
     expect(result.content[0]?.text).toContain("<article");
+    expect(result.content[1]?.text).toContain("cacheHtmlPath=");
     expect((result as { meta?: { cacheHtmlPath?: string } }).meta?.cacheHtmlPath).toBeTruthy();
+  });
+
+  it("removes leading markdown h1 in convert output", async () => {
+    const result = await handleToolCall("convert_markdown_to_wechat_html", {
+      markdown: "# 主标题\n\n正文",
+      theme: "default"
+    });
+    expect(result.isError).not.toBe(true);
+    const html = String(result.content[0]?.text);
+    const h1Matches = html.match(/<h1\b/g) ?? [];
+    expect(h1Matches.length).toBe(0);
+    expect(html).toContain("正文");
+  });
+
+  it("applies small font_size_preset", async () => {
+    const result = await handleToolCall("convert_markdown_to_wechat_html", {
+      markdown: "正文",
+      theme: "default",
+      font_size_preset: "small"
+    });
+    expect(result.isError).not.toBe(true);
+    expect(result.content[0]?.text).toContain("font-size: 14.4px");
   });
 
   it("reads markdown from markdown_path", async () => {
     const tempDir = mkdtempSync(join(tmpdir(), "wechat-md-tools-"));
     const inputPath = join(tempDir, "input.md");
-    writeFileSync(inputPath, "# FromFile", "utf8");
+    writeFileSync(inputPath, "# FromFile\n\nBodyFromFile", "utf8");
 
     try {
       const result = await handleToolCall("convert_markdown_to_wechat_html", { markdown_path: inputPath, theme: "default" });
       expect(result.isError).not.toBe(true);
-      expect(result.content[0]?.text).toContain("FromFile");
+      expect(result.content[0]?.text).toContain("BodyFromFile");
+      expect(result.content[0]?.text).not.toContain("<h1");
     } finally {
       rmSync(tempDir, { recursive: true, force: true });
     }
@@ -66,17 +99,17 @@ describe("tools", () => {
   it("prioritizes markdown when markdown and markdown_path are both provided", async () => {
     const tempDir = mkdtempSync(join(tmpdir(), "wechat-md-tools-"));
     const inputPath = join(tempDir, "input.md");
-    writeFileSync(inputPath, "# FromFile", "utf8");
+    writeFileSync(inputPath, "# FromFile\n\nBodyFromFile", "utf8");
 
     try {
       const result = await handleToolCall("convert_markdown_to_wechat_html", {
-        markdown: "# FromArg",
+        markdown: "# FromArg\n\nBodyFromArg",
         markdown_path: inputPath,
         theme: "default"
       });
       expect(result.isError).not.toBe(true);
-      expect(result.content[0]?.text).toContain("FromArg");
-      expect(result.content[0]?.text).not.toContain("FromFile");
+      expect(result.content[0]?.text).toContain("BodyFromArg");
+      expect(result.content[0]?.text).not.toContain("BodyFromFile");
     } finally {
       rmSync(tempDir, { recursive: true, force: true });
     }
@@ -112,5 +145,53 @@ describe("tools", () => {
   it("returns unknown tool error for arbitrary name", async () => {
     const result = await handleToolCall("not_exists", {});
     expect(result.isError).toBe(true);
+  });
+
+  it("validates required type for wechat_add_material", async () => {
+    const result = await handleToolCall("wechat_add_material", {
+      access_token: "token",
+      file_path: "/tmp/a.jpg"
+    });
+    expect(result.isError).toBe(true);
+    expect(result.content[0]?.text).toContain("type must be one of");
+  });
+
+  it("validates extension by material type", async () => {
+    const result = await handleToolCall("wechat_add_material", {
+      access_token: "token",
+      type: "thumb",
+      file_path: "/tmp/a.png"
+    });
+    expect(result.isError).toBe(true);
+    expect(result.content[0]?.text).toContain("Invalid file extension");
+  });
+
+  it("requires video description fields for video material", async () => {
+    const result = await handleToolCall("wechat_add_material", {
+      access_token: "token",
+      type: "video",
+      file_path: "/tmp/a.mp4",
+      title: "demo"
+    });
+    expect(result.isError).toBe(true);
+    expect(result.content[0]?.text).toContain("title and introduction are required");
+  });
+
+  it("validates required access_token for wechat_markdown_to_draft", async () => {
+    const result = await handleToolCall("wechat_markdown_to_draft", {
+      article_title: "title",
+      markdown: "# Hello"
+    });
+    expect(result.isError).toBe(true);
+    expect(result.content[0]?.text).toContain("access_token is required");
+  });
+
+  it("validates required article_title for wechat_markdown_to_draft", async () => {
+    const result = await handleToolCall("wechat_markdown_to_draft", {
+      access_token: "token",
+      markdown: "# Hello"
+    });
+    expect(result.isError).toBe(true);
+    expect(result.content[0]?.text).toContain("article_title is required");
   });
 });

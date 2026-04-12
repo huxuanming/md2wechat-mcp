@@ -38,6 +38,14 @@ describe("parseMarkdown", () => {
     expect(html).toContain("外部标题");
   });
 
+  it("supports font size preset scaling", () => {
+    const small = parseMarkdown("正文", "default", undefined, "small");
+    const large = parseMarkdown("正文", "default", undefined, "large");
+
+    expect(small).toContain("font-size: 14.4px");
+    expect(large).toContain("font-size: 17.6px");
+  });
+
   it("renders markdown tables", () => {
     const md = ["| 名称 | 值 |", "| --- | --- |", "| A | 1 |", "| B | **2** |"].join("\n");
     const html = parseMarkdown(md, "default");
@@ -77,5 +85,23 @@ describe("parseMarkdown", () => {
     const html = parseMarkdown(md, "default");
 
     expect(html).not.toContain("<table");
+  });
+
+  it("renders image with optional title", () => {
+    const md = '![封面](https://example.com/a.jpg "封面图")';
+    const html = parseMarkdown(md, "default");
+
+    expect(html).toContain("<img");
+    expect(html).toContain('src="https://example.com/a.jpg"');
+    expect(html).toContain('title="封面图"');
+  });
+
+  it("renders link with optional title", () => {
+    const md = '[官网](https://example.com "Example Site")';
+    const html = parseMarkdown(md, "default");
+
+    expect(html).toContain("<a ");
+    expect(html).toContain('href="https://example.com"');
+    expect(html).toContain('title="Example Site"');
   });
 });

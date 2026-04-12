@@ -1,4 +1,4 @@
-import { THEMES, type Theme } from "./themes.js";
+import { resolveTheme, type FontSizePreset, type Theme } from "./themes.js";
 
 function escapeHtml(text: string): string {
   return text
@@ -25,13 +25,23 @@ export function inlineFormat(text: string, theme: Theme): string {
   });
 
   // Images must be processed before links (pattern starts with `!`)
-  escaped = escaped.replace(/!\[([^\]]*)\]\((https?:\/\/[^\s)]+)\)/g, (_m, alt: string, src: string) => {
-    return stash(`<img src=\"${src}\" alt=\"${alt}\" style=\"max-width:100%;height:auto;display:block;margin:0.8em auto;\" />`);
-  });
+  escaped = escaped.replace(
+    /!\[([^\]]*)\]\((https?:\/\/[^\s)]+)(?:\s+(?:"([^"]+)"|'([^']+)'|&quot;([^&]+)&quot;|&#39;([^&]+)&#39;))?\)/g,
+    (_m, alt: string, src: string, t1?: string, t2?: string, t3?: string, t4?: string) => {
+      const title = t1 ?? t2 ?? t3 ?? t4;
+      const titleAttr = title ? ` title=\"${title}\"` : "";
+      return stash(`<img src=\"${src}\" alt=\"${alt}\"${titleAttr} style=\"max-width:100%;height:auto;display:block;margin:0.8em auto;\" />`);
+    }
+  );
 
-  escaped = escaped.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (_m, label: string, href: string) => {
-    return `<a href=\"${href}\" style=\"${theme.a}\">${label}</a>`;
-  });
+  escaped = escaped.replace(
+    /\[([^\]]+)\]\((https?:\/\/[^\s)]+)(?:\s+(?:"([^"]+)"|'([^']+)'|&quot;([^&]+)&quot;|&#39;([^&]+)&#39;))?\)/g,
+    (_m, label: string, href: string, t1?: string, t2?: string, t3?: string, t4?: string) => {
+      const title = t1 ?? t2 ?? t3 ?? t4;
+      const titleAttr = title ? ` title=\"${title}\"` : "";
+      return `<a href=\"${href}\"${titleAttr} style=\"${theme.a}\">${label}</a>`;
+    }
+  );
 
   escaped = escaped.replace(/\*\*([^*]+)\*\*/g, (_m, content: string) => {
     return `<strong style=\"${theme.strong}\">${content}</strong>`;
@@ -72,8 +82,8 @@ function parseColumnAlignment(cell: string): "left" | "right" | "center" | null 
   return null;
 }
 
-export function parseMarkdown(md: string, themeName = "default", title?: string): string {
-  const theme = THEMES[themeName] ?? THEMES.default;
+export function parseMarkdown(md: string, themeName = "default", title?: string, fontSizePreset: FontSizePreset = "medium"): string {
+  const theme = resolveTheme(themeName, fontSizePreset);
   const lines = md.replaceAll("\r\n", "\n").split("\n");
 
   const out: string[] = [];

@@ -45,4 +45,18 @@ describe("cli", () => {
     expect(proc.status).toBe(1);
     expect(proc.stderr).toContain("ENOENT");
   });
+
+  it("fails for invalid font size preset", () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "wechat-md-cli-"));
+    const input = join(tempDir, "input.md");
+    writeFileSync(input, "# Title\n", "utf8");
+
+    try {
+      const proc = runCli([input, "--font-size-preset", "huge"]);
+      expect(proc.status).toBe(1);
+      expect(proc.stderr).toContain("Invalid font size preset: huge");
+    } finally {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
 });

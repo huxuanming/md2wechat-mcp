@@ -1,9 +1,20 @@
 import { parseMarkdown } from "./markdown.js";
 import { saveHtmlCache } from "./cache.js";
 import { openFileInBrowser } from "./browser.js";
-import { THEME_NAMES, THEMES } from "./themes.js";
+import { THEME_NAMES, THEMES, type FontSizePreset } from "./themes.js";
 import { readFile } from "node:fs/promises";
-import { getAccessToken, draftAdd, draftUpdate, draftDelete, draftBatchGet, uploadImage, type WechatArticle } from "./wechat-api.js";
+import { dirname, extname, resolve } from "node:path";
+import {
+  getAccessToken,
+  draftAdd,
+  draftUpdate,
+  draftDelete,
+  draftBatchGet,
+  uploadImage,
+  addMaterial,
+  type WechatArticle,
+  type PermanentMaterialType
+} from "./wechat-api.js";
 
 export type TextContent = { type: "text"; text: string };
 
@@ -34,6 +45,15 @@ function invalidThemeResult(theme: unknown): ToolResult {
   };
 }
 
+const FONT_SIZE_PRESETS: FontSizePreset[] = ["small", "medium", "large"];
+
+function invalidFontSizePresetResult(preset: unknown): ToolResult {
+  return {
+    content: [{ type: "text", text: `Invalid font_size_preset: ${String(preset)}. Available: ${FONT_SIZE_PRESETS.join(", ")}` }],
+    isError: true
+  };
+}
+
 function validateMarkdown(markdown: unknown): markdown is string {
   return typeof markdown === "string" && markdown.trim().length > 0;
 }
@@ -45,6 +65,397 @@ function validateMarkdownPath(path: unknown): path is string {
 function validateCachePath(path: unknown): path is string {
   return typeof path === "string" && path.trim().length > 0;
 }
+
+function getFileExtension(inputPath: string): string {
+  const cleaned = inputPath.split(/[?#]/)[0] ?? inputPath;
+  return extname(cleaned).toLowerCase().replace(".", "");
+}
+
+function isRemoteUrl(url: string): boolean {
+  return /^https?:\/\//i.test(url);
+}
+
+type MarkdownImageToken = {
+  start: number;
+  end: number;
+  alt: string;
+  src: string;
+  title?: string;
+  titleQuote?: "'" | "\"";
+};
+
+function isWhitespace(char: string): boolean {
+  return /\s/.test(char);
+}
+
+type TextRange = { start: number; end: number };
+
+function mergeRanges(ranges: TextRange[]): TextRange[] {
+  if (ranges.length === 0) return [];
+  const sorted = [...ranges].sort((a, b) => a.start - b.start);
+  const merged: TextRange[] = [sorted[0] as TextRange];
+  for (let i = 1; i < sorted.length; i += 1) {
+    const current = sorted[i] as TextRange;
+    const last = merged[merged.length - 1] as TextRange;
+    if (current.start <= last.end) {
+      last.end = Math.max(last.end, current.end);
+    } else {
+      merged.push({ ...current });
+    }
+  }
+  return merged;
+}
+
+function computeExcludedRanges(markdown: string): TextRange[] {
+  const ranges: TextRange[] = [];
+  const lines = markdown.split("\n");
+  let offset = 0;
+  let inFence = false;
+  let fenceChar = "";
+  let fenceLen = 0;
+  let fenceStart = -1;
+
+  for (const line of lines) {
+    const trimmedLeft = line.replace(/^\s{0,3}/, "");
+    const fenceMatch = trimmedLeft.match(/^(`{3,}|~{3,})/);
+    if (fenceMatch) {
+      const marker = fenceMatch[1] as string;
+      const markerChar = marker[0] as string;
+      const markerLen = marker.length;
+      if (!inFence) {
+        inFence = true;
+        fenceChar = markerChar;
+        fenceLen = markerLen;
+        fenceStart = offset;
+      } else if (markerChar === fenceChar && markerLen >= fenceLen) {
+        ranges.push({ start: fenceStart, end: offset + line.length + 1 });
+        inFence = false;
+        fenceChar = "";
+        fenceLen = 0;
+        fenceStart = -1;
+      }
+    }
+    offset += line.length + 1;
+  }
+  if (inFence && fenceStart >= 0) {
+    ranges.push({ start: fenceStart, end: markdown.length });
+  }
+
+  // inline code spans outside fenced code
+  const fenceRanges = mergeRanges(ranges);
+  let i = 0;
+  let fenceIdx = 0;
+  while (i < markdown.length) {
+    const activeFence = fenceRanges[fenceIdx];
+    if (activeFence && i >= activeFence.start) {
+      i = Math.max(i, activeFence.end);
+      fenceIdx += 1;
+      continue;
+    }
+    if (markdown[i] !== "`") {
+      i += 1;
+      continue;
+    }
+
+    let runLen = 1;
+    while (i + runLen < markdown.length && markdown[i + runLen] === "`") runLen += 1;
+    const start = i;
+    i += runLen;
+    let close = -1;
+    while (i < markdown.length) {
+      if (markdown[i] !== "`") {
+        i += 1;
+        continue;
+      }
+      let closeRun = 1;
+      while (i + closeRun < markdown.length && markdown[i + closeRun] === "`") closeRun += 1;
+      if (closeRun === runLen) {
+        close = i + runLen;
+        break;
+      }
+      i += closeRun;
+    }
+    if (close > 0) {
+      ranges.push({ start, end: close });
+      i = close;
+    } else {
+      i = start + runLen;
+    }
+  }
+
+  return mergeRanges(ranges);
+}
+
+function findRangeAt(ranges: TextRange[], index: number): TextRange | undefined {
+  let left = 0;
+  let right = ranges.length - 1;
+  while (left <= right) {
+    const mid = Math.floor((left + right) / 2);
+    const range = ranges[mid] as TextRange;
+    if (index < range.start) right = mid - 1;
+    else if (index >= range.end) left = mid + 1;
+    else return range;
+  }
+  return undefined;
+}
+
+function readEscapedChar(input: string, cursor: number, escapable: Set<string>): { value: string; next: number } | undefined {
+  if (input[cursor] !== "\\" || cursor + 1 >= input.length) return undefined;
+  const nextChar = input[cursor + 1] as string;
+  if (!escapable.has(nextChar)) return undefined;
+  return { value: nextChar, next: cursor + 2 };
+}
+
+function escapeForQuotedTitle(value: string, quote: "'" | "\""): string {
+  const escapedSlash = value.replaceAll("\\", "\\\\");
+  return escapedSlash.replaceAll(quote, `\\${quote}`);
+}
+
+function parseMarkdownImageTokens(markdown: string): MarkdownImageToken[] {
+  const tokens: MarkdownImageToken[] = [];
+  const excludedRanges = computeExcludedRanges(markdown);
+
+  let i = 0;
+  while (i < markdown.length) {
+    const blocked = findRangeAt(excludedRanges, i);
+    if (blocked) {
+      i = blocked.end;
+      continue;
+    }
+    if (markdown[i] !== "!" || markdown[i + 1] !== "[") {
+      i += 1;
+      continue;
+    }
+    const start = i;
+    let cursor = i + 2;
+
+    let alt = "";
+    let altClosed = false;
+    while (cursor < markdown.length) {
+      const c = markdown[cursor];
+      const escaped = readEscapedChar(markdown, cursor, new Set(["\\", "]", "[", "(", ")", "\"", "'"]));
+      if (escaped) {
+        alt += escaped.value;
+        cursor = escaped.next;
+        continue;
+      }
+      if (c === "]") {
+        altClosed = true;
+        cursor += 1;
+        break;
+      }
+      alt += c;
+      cursor += 1;
+    }
+    if (!altClosed || markdown[cursor] !== "(") {
+      i += 1;
+      continue;
+    }
+    cursor += 1;
+
+    while (cursor < markdown.length && isWhitespace(markdown[cursor])) cursor += 1;
+
+    let src = "";
+    if (markdown[cursor] === "<") {
+      cursor += 1;
+      while (cursor < markdown.length) {
+        const c = markdown[cursor];
+        const escaped = readEscapedChar(markdown, cursor, new Set(["\\", ">", "<", "(", ")", "\"", "'", " "]));
+        if (escaped) {
+          src += escaped.value;
+          cursor = escaped.next;
+          continue;
+        }
+        if (c === ">") {
+          cursor += 1;
+          break;
+        }
+        src += c;
+        cursor += 1;
+      }
+    } else {
+      let depth = 0;
+      while (cursor < markdown.length) {
+        const c = markdown[cursor];
+        const escaped = readEscapedChar(markdown, cursor, new Set(["\\", "(", ")", " "]));
+        if (escaped) {
+          src += escaped.value;
+          cursor = escaped.next;
+          continue;
+        }
+        if (c === "(") {
+          depth += 1;
+          src += c;
+          cursor += 1;
+          continue;
+        }
+        if (c === ")") {
+          if (depth === 0) break;
+          depth -= 1;
+          src += c;
+          cursor += 1;
+          continue;
+        }
+        if (isWhitespace(c) && depth === 0) break;
+        src += c;
+        cursor += 1;
+      }
+    }
+
+    while (cursor < markdown.length && isWhitespace(markdown[cursor])) cursor += 1;
+
+    let title: string | undefined;
+    let titleQuote: "'" | "\"" | undefined;
+    if (markdown[cursor] === "\"" || markdown[cursor] === "'") {
+      titleQuote = markdown[cursor] as "'" | "\"";
+      cursor += 1;
+      let titleText = "";
+      while (cursor < markdown.length) {
+        const c = markdown[cursor];
+        const escaped = readEscapedChar(markdown, cursor, new Set(["\\", "\"", "'"]));
+        if (escaped) {
+          titleText += escaped.value;
+          cursor = escaped.next;
+          continue;
+        }
+        if (c === titleQuote) {
+          cursor += 1;
+          break;
+        }
+        titleText += c;
+        cursor += 1;
+      }
+      title = titleText;
+      while (cursor < markdown.length && isWhitespace(markdown[cursor])) cursor += 1;
+    }
+
+    if (markdown[cursor] !== ")" || !src) {
+      i += 1;
+      continue;
+    }
+
+    tokens.push({ start, end: cursor + 1, alt, src, title, titleQuote });
+    i = cursor + 1;
+  }
+  return tokens;
+}
+
+function replaceMarkdownImageSources(markdown: string, srcMap: Map<string, string>): string {
+  const tokens = parseMarkdownImageTokens(markdown);
+  if (tokens.length === 0) return markdown;
+
+  let out = "";
+  let last = 0;
+
+  for (const token of tokens) {
+    out += markdown.slice(last, token.start);
+    const mapped = srcMap.get(token.src);
+    if (!mapped) {
+      out += markdown.slice(token.start, token.end);
+      last = token.end;
+      continue;
+    }
+    const quote = token.titleQuote ?? "\"";
+    const titlePart = token.title ? ` ${quote}${escapeForQuotedTitle(token.title, quote)}${quote}` : "";
+    out += `![${token.alt}](${mapped}${titlePart})`;
+    last = token.end;
+  }
+
+  out += markdown.slice(last);
+  return out;
+}
+
+function removeMarkdownSlice(markdown: string, start: number, end: number): string {
+  const removed = `${markdown.slice(0, start)}${markdown.slice(end)}`;
+  return removed.replace(/\n{3,}/g, "\n\n");
+}
+
+function removeLeadingAtxH1(markdown: string): string {
+  const normalized = markdown.replace(/^\uFEFF/, "").replaceAll("\r\n", "\n");
+  const lines = normalized.split("\n");
+
+  let index = 0;
+  while (index < lines.length && !lines[index]?.trim()) {
+    index += 1;
+  }
+
+  if (lines[index]?.trim() === "---") {
+    index += 1;
+    while (index < lines.length && lines[index]?.trim() !== "---") {
+      index += 1;
+    }
+    if (index < lines.length) {
+      index += 1;
+    }
+  }
+
+  while (index < lines.length && !lines[index]?.trim()) {
+    index += 1;
+  }
+
+  const line = lines[index];
+  if (!line || !/^\s{0,3}#\s+(.+?)\s*#*\s*$/u.test(line)) {
+    return markdown;
+  }
+
+  lines.splice(index, 1);
+  while (index < lines.length && !lines[index]?.trim()) {
+    lines.splice(index, 1);
+  }
+
+  return lines.join("\n");
+}
+
+async function resolveMarkdownSource(args: Record<string, unknown>): Promise<{ markdown: string; markdownPath?: string } | ToolResult> {
+  const directMarkdown = args.markdown;
+  const markdownPath = args.markdown_path;
+
+  if (directMarkdown !== undefined) {
+    if (!validateMarkdown(directMarkdown)) {
+      return {
+        content: [{ type: "text", text: "markdown must be a non-empty string when provided." }],
+        isError: true
+      };
+    }
+    return { markdown: directMarkdown, markdownPath: typeof markdownPath === "string" ? markdownPath : undefined };
+  }
+
+  if (validateMarkdownPath(markdownPath)) {
+    try {
+      const markdown = await readFile(markdownPath, "utf8");
+      if (!validateMarkdown(markdown)) {
+        return {
+          content: [{ type: "text", text: "markdown_path points to an empty markdown file." }],
+          isError: true
+        };
+      }
+      return { markdown, markdownPath };
+    } catch (error) {
+      return {
+        content: [{ type: "text", text: `Failed to read markdown_path: ${(error as Error).message}` }],
+        isError: true
+      };
+    }
+  }
+
+  return {
+    content: [{ type: "text", text: "Provide one markdown source: markdown or markdown_path." }],
+    isError: true
+  };
+}
+
+function isToolResult(value: ToolResult | { markdown: string; markdownPath?: string }): value is ToolResult {
+  return "content" in value;
+}
+
+const PERMANENT_MATERIAL_TYPES: PermanentMaterialType[] = ["image", "voice", "video", "thumb"];
+
+const MATERIAL_EXTENSION_RULES: Record<PermanentMaterialType, string[]> = {
+  image: ["bmp", "png", "jpeg", "jpg", "gif"],
+  voice: ["mp3", "wma", "wav", "amr"],
+  video: ["mp4"],
+  thumb: ["jpg", "jpeg"]
+};
 
 export async function handleToolCall(name: string, args: Record<string, unknown>): Promise<ToolResult> {
   if (name === "list_wechat_themes") {
@@ -90,26 +501,32 @@ export async function handleToolCall(name: string, args: Record<string, unknown>
       };
     }
 
+    markdown = removeLeadingAtxH1(markdown);
+
     const theme = args.theme ?? "default";
     if (typeof theme !== "string" || !(theme in THEMES)) {
       return invalidThemeResult(theme);
     }
+    const fontSizePresetArg = args.font_size_preset ?? "medium";
+    if (typeof fontSizePresetArg !== "string" || !FONT_SIZE_PRESETS.includes(fontSizePresetArg as FontSizePreset)) {
+      return invalidFontSizePresetResult(fontSizePresetArg);
+    }
+    const fontSizePreset = fontSizePresetArg as FontSizePreset;
 
     const title = typeof args.title === "string" ? args.title : undefined;
+    const accessToken = typeof args.access_token === "string" ? args.access_token.trim() : undefined;
 
     // Upload local images if access_token is provided
-    const accessToken = typeof args.access_token === "string" ? args.access_token.trim() : undefined;
     if (accessToken) {
-      const baseDir = typeof markdownPath === "string" ? markdownPath.replace(/[^/\\]+$/, "") : "";
-      const localImagePattern = /!\[([^\]]*)\]\((?!https?:\/\/)([^)]+)\)/g;
+      const baseDir = typeof markdownPath === "string" ? dirname(markdownPath) : process.cwd();
       const uploadErrors: string[] = [];
       const uploadCache = new Map<string, string>();
+      const imageTokens = parseMarkdownImageTokens(markdown);
 
-      const matches = [...markdown.matchAll(localImagePattern)];
-      for (const match of matches) {
-        const rawPath = match[2];
-        if (!rawPath || uploadCache.has(rawPath)) continue;
-        const absPath = rawPath.startsWith("/") ? rawPath : `${baseDir}${rawPath}`;
+      for (const token of imageTokens) {
+        const rawPath = token.src;
+        if (!rawPath || uploadCache.has(rawPath) || isRemoteUrl(rawPath)) continue;
+        const absPath = rawPath.startsWith("/") ? rawPath : resolve(baseDir, rawPath);
         try {
           const result = await uploadImage(accessToken, absPath);
           uploadCache.set(rawPath, result.url);
@@ -118,9 +535,7 @@ export async function handleToolCall(name: string, args: Record<string, unknown>
         }
       }
 
-      for (const [localPath, cdnUrl] of uploadCache) {
-        markdown = markdown.replaceAll(`](${localPath})`, `](${cdnUrl})`);
-      }
+      markdown = replaceMarkdownImageSources(markdown, uploadCache);
 
       if (uploadErrors.length > 0) {
         return {
@@ -130,11 +545,16 @@ export async function handleToolCall(name: string, args: Record<string, unknown>
       }
     }
 
-    const html = parseMarkdown(markdown, theme, title);
+    const html = parseMarkdown(markdown, theme, title, fontSizePreset);
     const savedPath = saveHtmlCache(html);
 
+    const visibleMetaLines = [`cacheHtmlPath=${savedPath}`];
+
     return {
-      content: [{ type: "text", text: html }],
+      content: [
+        { type: "text", text: html },
+        { type: "text", text: visibleMetaLines.join("\n") }
+      ],
       meta: { cacheHtmlPath: savedPath }
     };
   }
@@ -204,6 +624,123 @@ export async function handleToolCall(name: string, args: Record<string, unknown>
     }
   }
 
+  if (name === "wechat_markdown_to_draft") {
+    const accessToken = args.access_token;
+    const articleTitle = args.article_title;
+    const author = typeof args.author === "string" ? args.author : undefined;
+    const digest = typeof args.digest === "string" ? args.digest : undefined;
+    const contentSourceUrl = typeof args.content_source_url === "string" ? args.content_source_url : undefined;
+    const thumbMediaIdInput = typeof args.thumb_media_id === "string" ? args.thumb_media_id : undefined;
+    const needOpenComment = args.need_open_comment;
+    const onlyFansCanComment = args.only_fans_can_comment;
+
+    if (typeof accessToken !== "string" || !accessToken.trim()) {
+      return { content: [{ type: "text", text: "access_token is required." }], isError: true };
+    }
+    if (typeof articleTitle !== "string" || !articleTitle.trim()) {
+      return { content: [{ type: "text", text: "article_title is required." }], isError: true };
+    }
+    if (needOpenComment !== undefined && needOpenComment !== 0 && needOpenComment !== 1) {
+      return { content: [{ type: "text", text: "need_open_comment must be 0 or 1." }], isError: true };
+    }
+    if (onlyFansCanComment !== undefined && onlyFansCanComment !== 0 && onlyFansCanComment !== 1) {
+      return { content: [{ type: "text", text: "only_fans_can_comment must be 0 or 1." }], isError: true };
+    }
+
+    const source = await resolveMarkdownSource(args);
+    if (isToolResult(source)) {
+      return source;
+    }
+    let markdownForConvert = source.markdown;
+    const markdownPath = source.markdownPath;
+    const baseDir = markdownPath ? dirname(markdownPath) : process.cwd();
+    const imageTokens = parseMarkdownImageTokens(markdownForConvert);
+
+    let designatedCoverMediaId: string | undefined;
+    let firstImageCoverMediaId: string | undefined;
+
+    if (!thumbMediaIdInput) {
+      const designatedCoverToken = imageTokens.find((token) => token.title?.trim() === "封面");
+      if (designatedCoverToken && !isRemoteUrl(designatedCoverToken.src)) {
+        const coverExt = getFileExtension(designatedCoverToken.src);
+        if (coverExt === "jpg" || coverExt === "jpeg") {
+          const coverPath = designatedCoverToken.src.startsWith("/") ? designatedCoverToken.src : resolve(baseDir, designatedCoverToken.src);
+          try {
+            const coverResult = await addMaterial(accessToken, "thumb", coverPath);
+            designatedCoverMediaId = coverResult.media_id;
+            markdownForConvert = removeMarkdownSlice(markdownForConvert, designatedCoverToken.start, designatedCoverToken.end);
+          } catch (error) {
+            return { content: [{ type: "text", text: `Cover upload failed: ${(error as Error).message}` }], isError: true };
+          }
+        }
+      }
+
+      if (!designatedCoverMediaId) {
+        const firstLocalImage = imageTokens.find((token) => !isRemoteUrl(token.src));
+        if (firstLocalImage) {
+          const ext = getFileExtension(firstLocalImage.src);
+          if (ext === "jpg" || ext === "jpeg") {
+            const firstPath = firstLocalImage.src.startsWith("/") ? firstLocalImage.src : resolve(baseDir, firstLocalImage.src);
+            try {
+              const firstResult = await addMaterial(accessToken, "thumb", firstPath);
+              firstImageCoverMediaId = firstResult.media_id;
+            } catch {
+              firstImageCoverMediaId = undefined;
+            }
+          }
+        }
+      }
+    }
+
+    markdownForConvert = removeLeadingAtxH1(markdownForConvert);
+
+    const convertResult = await handleToolCall("convert_markdown_to_wechat_html", {
+      markdown: markdownForConvert,
+      markdown_path: markdownPath,
+      theme: args.theme,
+      font_size_preset: args.font_size_preset,
+      access_token: accessToken
+    });
+    if (convertResult.isError) {
+      return convertResult;
+    }
+
+    const html = convertResult.content[0]?.text;
+    if (!validateMarkdown(html)) {
+      return {
+        content: [{ type: "text", text: "Failed to generate HTML content from markdown." }],
+        isError: true
+      };
+    }
+
+    const finalThumbMediaId = thumbMediaIdInput || designatedCoverMediaId || firstImageCoverMediaId;
+
+    const article: WechatArticle = {
+      title: articleTitle,
+      content: html,
+      ...(author ? { author } : {}),
+      ...(digest ? { digest } : {}),
+      ...(contentSourceUrl ? { content_source_url: contentSourceUrl } : {}),
+      ...(finalThumbMediaId ? { thumb_media_id: finalThumbMediaId } : {}),
+      ...(needOpenComment === 0 || needOpenComment === 1 ? { need_open_comment: needOpenComment } : {}),
+      ...(onlyFansCanComment === 0 || onlyFansCanComment === 1 ? { only_fans_can_comment: onlyFansCanComment } : {})
+    };
+
+    try {
+      const draftResult = await draftAdd(accessToken, [article]);
+      return {
+        content: [{ type: "text", text: JSON.stringify(draftResult, null, 2) }],
+        meta: {
+          mediaId: draftResult.media_id,
+          cacheHtmlPath: convertResult.meta?.cacheHtmlPath,
+          ...(finalThumbMediaId ? { thumbMediaId: finalThumbMediaId } : {})
+        }
+      };
+    } catch (error) {
+      return { content: [{ type: "text", text: (error as Error).message }], isError: true };
+    }
+  }
+
   if (name === "wechat_draft_update") {
     const accessToken = args.access_token;
     const mediaId = args.media_id;
@@ -238,12 +775,53 @@ export async function handleToolCall(name: string, args: Record<string, unknown>
     if (typeof filePath !== "string" || !filePath.trim()) {
       return { content: [{ type: "text", text: "file_path is required." }], isError: true };
     }
-    const ext = filePath.toLowerCase().split(".").pop();
+    const ext = getFileExtension(filePath);
     if (ext !== "jpg" && ext !== "jpeg" && ext !== "png") {
       return { content: [{ type: "text", text: "Only JPG and PNG files are supported." }], isError: true };
     }
     try {
       const result = await uploadImage(accessToken, filePath);
+      return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
+    } catch (error) {
+      return { content: [{ type: "text", text: (error as Error).message }], isError: true };
+    }
+  }
+
+  if (name === "wechat_add_material") {
+    const accessToken = args.access_token;
+    const type = args.type;
+    const filePath = args.file_path;
+    const title = typeof args.title === "string" ? args.title.trim() : undefined;
+    const introduction = typeof args.introduction === "string" ? args.introduction.trim() : undefined;
+
+    if (typeof accessToken !== "string" || !accessToken.trim()) {
+      return { content: [{ type: "text", text: "access_token is required." }], isError: true };
+    }
+    if (typeof type !== "string" || !PERMANENT_MATERIAL_TYPES.includes(type as PermanentMaterialType)) {
+      return { content: [{ type: "text", text: "type must be one of: image, voice, video, thumb." }], isError: true };
+    }
+    if (typeof filePath !== "string" || !filePath.trim()) {
+      return { content: [{ type: "text", text: "file_path is required." }], isError: true };
+    }
+
+    const ext = getFileExtension(filePath);
+    const allowedExt = MATERIAL_EXTENSION_RULES[type as PermanentMaterialType];
+    if (!ext || !allowedExt.includes(ext)) {
+      return {
+        content: [{ type: "text", text: `Invalid file extension for type=${type}. Allowed: ${allowedExt.join(", ")}.` }],
+        isError: true
+      };
+    }
+
+    if (type === "video" && (!title || !introduction)) {
+      return {
+        content: [{ type: "text", text: "For video material, both title and introduction are required." }],
+        isError: true
+      };
+    }
+
+    try {
+      const result = await addMaterial(accessToken, type as PermanentMaterialType, filePath, title || introduction ? { title, introduction } : undefined);
       return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
     } catch (error) {
       return { content: [{ type: "text", text: (error as Error).message }], isError: true };
