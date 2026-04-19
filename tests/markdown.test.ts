@@ -42,8 +42,8 @@ describe("parseMarkdown", () => {
     const small = parseMarkdown("正文", "default", undefined, "small");
     const large = parseMarkdown("正文", "default", undefined, "large");
 
-    expect(small).toContain("font-size: 14.4px");
-    expect(large).toContain("font-size: 17.6px");
+    expect(small).toContain("font-size: 12.6px");
+    expect(large).toContain("font-size: 15.4px");
   });
 
   it("renders markdown tables", () => {
@@ -103,5 +103,13 @@ describe("parseMarkdown", () => {
     expect(html).toContain("<a ");
     expect(html).toContain('href="https://example.com"');
     expect(html).toContain('title="Example Site"');
+  });
+
+  it("renders Chinese quoted blockquote lines", () => {
+    const md = '> “我的车明明还有 30% 的电，怎么突然就报警停机了？”';
+    const html = parseMarkdown(md, "default");
+
+    expect(html).toContain("<blockquote");
+    expect(html).toContain("我的车明明还有 30% 的电，怎么突然就报警停机了？");
   });
 });
