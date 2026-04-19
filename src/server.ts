@@ -168,12 +168,14 @@ export function createServer(): McpServer {
   server.registerTool(
     "wechat_draft_update",
     {
-      description: "Update an existing draft in WeChat Official Account draft box by media_id.",
+      description:
+        "Update an existing draft in WeChat Official Account draft box by media_id. The leading <h1> in article.content is removed automatically; local <img src> paths are auto-uploaded and replaced with WeChat URLs.",
       inputSchema: {
         access_token: z.string().describe("WeChat API access token from wechat_get_access_token"),
         media_id: z.string().describe("Draft media_id returned from wechat_draft_add"),
         index: z.number().int().min(0).default(0).describe("0-based index of article to update within the draft"),
-        article: articleSchema.describe("Updated article content")
+        article: articleSchema.describe("Updated article content"),
+        base_dir: z.string().optional().describe("Base directory for resolving relative local image paths in article.content (defaults to current working directory).")
       }
     },
     async (args) => handleToolCall("wechat_draft_update", args as Record<string, unknown>)

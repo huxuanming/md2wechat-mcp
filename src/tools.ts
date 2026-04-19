@@ -365,6 +365,72 @@ function replaceMarkdownImageSources(markdown: string, srcMap: Map<string, strin
   return out;
 }
 
+async function uploadLocalImageSourcesInHtml(
+  html: string,
+  accessToken: string,
+  baseDir: string
+): Promise<{ html: string; uploadedCount: number }> {
+  const uploadErrors: string[] = [];
+  const uploadCache = new Map<string, string>();
+  let uploadedCount = 0;
+
+  const imgTags = [...html.matchAll(/<img\b[^>]*\bsrc\s*=\s*(?:"[^"]*"|'[^']*'|[^\s"'=<>`]+)[^>]*>/giu)];
+  if (imgTags.length === 0) {
+    return { html, uploadedCount };
+  }
+
+  const replacements = new Map<string, string>();
+  for (const match of imgTags) {
+    const imgTag = match[0];
+    if (replacements.has(imgTag)) {
+      continue;
+    }
+    const srcMatch = imgTag.match(/src\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`]+))/iu);
+    if (!srcMatch) {
+      continue;
+    }
+    const rawSrc = srcMatch?.[1] ?? srcMatch?.[2] ?? srcMatch?.[3];
+    if (!rawSrc) {
+      continue;
+    }
+    const normalizedSrc = rawSrc.trim();
+    if (!normalizedSrc || isRemoteUrl(normalizedSrc) || /^data:/iu.test(normalizedSrc)) {
+      continue;
+    }
+
+    const cached = uploadCache.get(normalizedSrc);
+    if (cached) {
+      replacements.set(imgTag, imgTag.replace(srcMatch[0], `src="${cached}"`));
+      continue;
+    }
+
+    const absPath = normalizedSrc.startsWith("/") ? normalizedSrc : resolve(baseDir, normalizedSrc);
+    try {
+      const uploaded = await uploadImage(accessToken, absPath);
+      uploadCache.set(normalizedSrc, uploaded.url);
+      uploadedCount += 1;
+      replacements.set(imgTag, imgTag.replace(srcMatch[0], `src="${uploaded.url}"`));
+    } catch (error) {
+      uploadErrors.push(`${normalizedSrc}: ${(error as Error).message}`);
+    }
+  }
+
+  if (uploadErrors.length > 0) {
+    throw new Error(`Image upload failed:\n${uploadErrors.join("\n")}`);
+  }
+
+  let rewrittenHtml = html;
+  for (const [before, after] of replacements) {
+    rewrittenHtml = rewrittenHtml.split(before).join(after);
+  }
+
+  return { html: rewrittenHtml, uploadedCount };
+}
+
+function removeLeadingHtmlH1(html: string): string {
+  return html.replace(/^\s*<h1\b[^>]*>[\s\S]*?<\/h1>\s*/iu, "");
+}
+
 function removeMarkdownSlice(markdown: string, start: number, end: number): string {
   const removed = `${markdown.slice(0, start)}${markdown.slice(end)}`;
   return removed.replace(/\n{3,}/g, "\n\n");
@@ -804,6 +870,7 @@ export async function handleToolCall(name: string, args: Record<string, unknown>
     const mediaId = args.media_id;
     const index = args.index ?? 0;
     const article = args.article;
+    const baseDirArg = args.base_dir;
     if (typeof accessToken !== "string" || !accessToken.trim()) {
       return { content: [{ type: "text", text: "access_token is required." }], isError: true };
     }
@@ -816,8 +883,21 @@ export async function handleToolCall(name: string, args: Record<string, unknown>
     if (typeof article !== "object" || article === null) {
       return { content: [{ type: "text", text: "article is required." }], isError: true };
     }
+
+    const baseDir = typeof baseDirArg === "string" && baseDirArg.trim() ? baseDirArg.trim() : process.cwd();
+    const articleToUpdate: WechatArticle = { ...(article as WechatArticle) };
+
+    if (typeof articleToUpdate.content === "string" && articleToUpdate.content.trim()) {
+      try {
+        const sanitizedHtml = removeLeadingHtmlH1(articleToUpdate.content);
+        const replaced = await uploadLocalImageSourcesInHtml(sanitizedHtml, accessToken, baseDir);
+        articleToUpdate.content = replaced.html;
+      } catch (error) {
+        return { content: [{ type: "text", text: (error as Error).message }], isError: true };
+      }
+    }
     try {
-      const result = await draftUpdate(accessToken, mediaId, index, article as WechatArticle);
+      const result = await draftUpdate(accessToken, mediaId, index, articleToUpdate);
       return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };
     } catch (error) {
       return { content: [{ type: "text", text: (error as Error).message }], isError: true };
