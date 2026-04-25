@@ -2,20 +2,40 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { pathToFileURL } from "node:url";
 
 const { openFileInBrowser } = vi.hoisted(() => ({
   openFileInBrowser: vi.fn().mockResolvedValue(undefined)
+}));
+
+const apiMocks = vi.hoisted(() => ({
+  getAccessToken: vi.fn(),
+  draftAdd: vi.fn(),
+  draftUpdate: vi.fn(),
+  draftDelete: vi.fn(),
+  draftBatchGet: vi.fn(),
+  uploadImage: vi.fn(),
+  addMaterial: vi.fn()
 }));
 
 vi.mock("../src/browser.js", () => ({
   openFileInBrowser
 }));
 
+vi.mock("../src/wechat-api.js", () => apiMocks);
+
 import { handleToolCall, listThemesPayload } from "../src/tools.js";
 
 describe("tools", () => {
   beforeEach(() => {
     openFileInBrowser.mockClear();
+    apiMocks.getAccessToken.mockReset();
+    apiMocks.draftAdd.mockReset();
+    apiMocks.draftUpdate.mockReset();
+    apiMocks.draftDelete.mockReset();
+    apiMocks.draftBatchGet.mockReset();
+    apiMocks.uploadImage.mockReset();
+    apiMocks.addMaterial.mockReset();
   });
 
   it("returns theme list payload", () => {
@@ -78,7 +98,7 @@ describe("tools", () => {
       font_size_preset: "small"
     });
     expect(result.isError).not.toBe(true);
-    expect(result.content[0]?.text).toContain("font-size: 14.4px");
+    expect(result.content[0]?.text).toContain("font-size: 12.6px");
   });
 
   it("reads markdown from markdown_path", async () => {
@@ -110,6 +130,50 @@ describe("tools", () => {
       expect(result.isError).not.toBe(true);
       expect(result.content[0]?.text).toContain("BodyFromArg");
       expect(result.content[0]?.text).not.toContain("BodyFromFile");
+    } finally {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it("rewrites local markdown image sources to file urls for preview html", async () => {
+    const tempDir = mkdtempSync(join(tmpdir(), "wechat-md-tools-"));
+    const imagePath = join(tempDir, "cover-20260425-换锂电池别先问续航.png");
+    const markdownPath = join(tempDir, "input.md");
+    writeFileSync(imagePath, "fake-image", "utf8");
+    writeFileSync(markdownPath, `![封面](./cover-20260425-换锂电池别先问续航.png)\n\n正文`, "utf8");
+
+    try {
+      const result = await handleToolCall("convert_markdown_to_wechat_html", {
+        markdown_path: markdownPath,
+        theme: "default"
+      });
+      expect(result.isError).not.toBe(true);
+      expect(result.content[0]?.text).toContain(pathToFileURL(imagePath).href);
+      expect(apiMocks.uploadImage).not.toHaveBeenCalled();
+    } finally {
+      rmSync(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it("uploads local markdown image sources when access_token is provided", async () => {
+    apiMocks.uploadImage.mockResolvedValue({ url: "https://mmbiz.qpic.cn/mock-uploaded.png" });
+
+    const tempDir = mkdtempSync(join(tmpdir(), "wechat-md-tools-"));
+    const imagePath = join(tempDir, "cover.png");
+    const markdownPath = join(tempDir, "input.md");
+    writeFileSync(imagePath, "fake-image", "utf8");
+    writeFileSync(markdownPath, `![封面](./cover.png)\n\n正文`, "utf8");
+
+    try {
+      const result = await handleToolCall("convert_markdown_to_wechat_html", {
+        markdown_path: markdownPath,
+        theme: "default",
+        access_token: "token"
+      });
+      expect(result.isError).not.toBe(true);
+      expect(apiMocks.uploadImage).toHaveBeenCalledWith("token", imagePath);
+      expect(result.content[0]?.text).toContain("https://mmbiz.qpic.cn/mock-uploaded.png");
+      expect(result.content[0]?.text).not.toContain(pathToFileURL(imagePath).href);
     } finally {
       rmSync(tempDir, { recursive: true, force: true });
     }

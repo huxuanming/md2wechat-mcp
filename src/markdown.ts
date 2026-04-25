@@ -26,7 +26,7 @@ export function inlineFormat(text: string, theme: Theme): string {
 
   // Images must be processed before links (pattern starts with `!`)
   escaped = escaped.replace(
-    /!\[([^\]]*)\]\((https?:\/\/[^\s)]+)(?:\s+(?:"([^"]+)"|'([^']+)'|&quot;([^&]+)&quot;|&#39;([^&]+)&#39;))?\)/g,
+    /!\[([^\]]*)\]\(((?:https?:\/\/|file:\/\/|\/|\.\.?\/)[^\s)]+)(?:\s+(?:"([^"]+)"|'([^']+)'|&quot;([^&]+)&quot;|&#39;([^&]+)&#39;))?\)/g,
     (_m, alt: string, src: string, t1?: string, t2?: string, t3?: string, t4?: string) => {
       const title = t1 ?? t2 ?? t3 ?? t4;
       const titleAttr = title ? ` title=\"${title}\"` : "";

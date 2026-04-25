@@ -4,6 +4,7 @@ import { openFileInBrowser } from "./browser.js";
 import { THEME_NAMES, THEMES, type FontSizePreset } from "./themes.js";
 import { readFile } from "node:fs/promises";
 import { basename, dirname, extname, resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 import {
   getAccessToken,
   draftAdd,
@@ -365,6 +366,21 @@ function replaceMarkdownImageSources(markdown: string, srcMap: Map<string, strin
   return out;
 }
 
+function rewriteLocalMarkdownImageSources(markdown: string, baseDir: string): string {
+  const rewritten = new Map<string, string>();
+
+  for (const token of parseMarkdownImageTokens(markdown)) {
+    const rawPath = token.src.trim();
+    if (!rawPath || isRemoteUrl(rawPath) || /^data:/iu.test(rawPath) || rewritten.has(rawPath)) {
+      continue;
+    }
+    const absPath = rawPath.startsWith("/") ? rawPath : resolve(baseDir, rawPath);
+    rewritten.set(rawPath, pathToFileURL(absPath).href);
+  }
+
+  return replaceMarkdownImageSources(markdown, rewritten);
+}
+
 async function uploadLocalImageSourcesInHtml(
   html: string,
   accessToken: string,
@@ -634,9 +650,10 @@ export async function handleToolCall(name: string, args: Record<string, unknown>
     const title = typeof args.title === "string" ? args.title : undefined;
     const accessToken = typeof args.access_token === "string" ? args.access_token.trim() : undefined;
 
+    const baseDir = typeof markdownPath === "string" ? dirname(markdownPath) : process.cwd();
+
     // Upload local images if access_token is provided
     if (accessToken) {
-      const baseDir = typeof markdownPath === "string" ? dirname(markdownPath) : process.cwd();
       const uploadErrors: string[] = [];
       const uploadCache = new Map<string, string>();
       const imageTokens = parseMarkdownImageTokens(markdown);
@@ -661,6 +678,8 @@ export async function handleToolCall(name: string, args: Record<string, unknown>
           isError: true
         };
       }
+    } else {
+      markdown = rewriteLocalMarkdownImageSources(markdown, baseDir);
     }
 
     const html = parseMarkdown(markdown, theme, title, fontSizePreset);
