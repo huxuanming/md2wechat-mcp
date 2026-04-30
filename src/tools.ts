@@ -444,7 +444,12 @@ async function uploadLocalImageSourcesInHtml(
 }
 
 function removeLeadingHtmlH1(html: string): string {
-  return html.replace(/^\s*<h1\b[^>]*>[\s\S]*?<\/h1>\s*/iu, "");
+  // Handle two common shapes:
+  // 1) HTML starts directly with <h1>...</h1>
+  // 2) HTML starts with a wrapper (e.g. <article ...>) and then leading <h1>...</h1>
+  let cleaned = html.replace(/^\s*<h1\b[^>]*>[\s\S]*?<\/h1>\s*/iu, "");
+  cleaned = cleaned.replace(/(^\s*<article\b[^>]*>\s*)<h1\b[^>]*>[\s\S]*?<\/h1>\s*/iu, "$1");
+  return cleaned;
 }
 
 function removeMarkdownSlice(markdown: string, start: number, end: number): string {
@@ -905,6 +910,29 @@ export async function handleToolCall(name: string, args: Record<string, unknown>
 
     const baseDir = typeof baseDirArg === "string" && baseDirArg.trim() ? baseDirArg.trim() : process.cwd();
     const articleToUpdate: WechatArticle = { ...(article as WechatArticle) };
+
+    if (!articleToUpdate.thumb_media_id) {
+      try {
+        let offset = 0;
+        const pageSize = 20;
+        let totalCount = Number.POSITIVE_INFINITY;
+        while (offset < totalCount) {
+          const page = await draftBatchGet(accessToken, offset, pageSize, 0);
+          totalCount = page.total_count ?? 0;
+          const target = page.item?.find((it) => it.media_id === mediaId);
+          if (target) {
+            const existing = target.content?.news_item?.[index];
+            if (existing?.thumb_media_id) {
+              articleToUpdate.thumb_media_id = existing.thumb_media_id;
+            }
+            break;
+          }
+          offset += pageSize;
+        }
+      } catch {
+        // Keep update path best-effort; fallback to caller-provided payload.
+      }
+    }
 
     if (typeof articleToUpdate.content === "string" && articleToUpdate.content.trim()) {
       try {
