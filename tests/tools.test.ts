@@ -98,7 +98,7 @@ describe("tools", () => {
       font_size_preset: "small"
     });
     expect(result.isError).not.toBe(true);
-    expect(result.content[0]?.text).toContain("font-size: 12.6px");
+    expect(result.content[0]?.text).toContain("font-size: 13.5px");
   });
 
   it("reads markdown from markdown_path", async () => {

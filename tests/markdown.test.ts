@@ -42,8 +42,8 @@ describe("parseMarkdown", () => {
     const small = parseMarkdown("正文", "default", undefined, "small");
     const large = parseMarkdown("正文", "default", undefined, "large");
 
-    expect(small).toContain("font-size: 12.6px");
-    expect(large).toContain("font-size: 15.4px");
+    expect(small).toContain("font-size: 13.5px");
+    expect(large).toContain("font-size: 16.5px");
   });
 
   it("renders markdown tables", () => {

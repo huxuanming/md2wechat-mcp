@@ -24,13 +24,13 @@ export type FontSizePreset = "small" | "medium" | "large";
 export const THEMES: Record<string, Theme> = {
   default: {
     article: "max-width: 860px; margin: 0 auto; color: #1f2329; font-size: 15px; line-height: 1.8;",
-    h1: "font-size: 19px; line-height: 1.35; margin: 1.3em 0 0.7em; color: #102a43;",
-    h2: "font-size: 16px; line-height: 1.4; margin: 1.2em 0 0.65em; color: #16324f; border-left: 4px solid #1f6feb; padding-left: 10px;",
-    h3: "font-size: 14px; line-height: 1.45; margin: 1.1em 0 0.55em; color: #1f4b7a;",
+    h1: "font-size: 20px; line-height: 1.35; margin: 1.3em 0 0.7em; color: #102a43;",
+    h2: "font-size: 17px; line-height: 1.4; margin: 1.2em 0 0.65em; color: #16324f; border-left: 4px solid #1f6feb; padding-left: 10px;",
+    h3: "font-size: 15px; line-height: 1.45; margin: 1.1em 0 0.55em; color: #1f4b7a;",
     p: "margin: 0.85em 0; font-size: 15px;",
     li: "margin: 0.35em 0; font-size: 15px;",
     blockquote:
-      "margin: 1em 0; padding: 0.62em 0.82em; color: #1f4b7a; background: #eef6ff; border: 1px solid #c6dcf6; border-left: 2px solid #1f6feb; border-radius: 0; font-size: 12px;",
+      "margin: 1em 0; padding: 0.62em 0.82em; color: #1f4b7a; background: #eef6ff; border: 1px solid #c6dcf6; border-left: 2px solid #1f6feb; border-radius: 0; font-size: 13px;",
     code_inline: "font-family: Menlo, Consolas, monospace; font-size: 0.92em; background: #f2f4f8; padding: 0.1em 0.34em; border-radius: 4px;",
     pre: "margin: 1em 0; padding: 1em; background: #0b1f35; color: #eaf2ff; border-radius: 8px; overflow-x: auto; line-height: 1.6;",
     hr: "border: none; border-top: 1px solid #d0d7de; margin: 1.2em 0;",
@@ -45,13 +45,13 @@ export const THEMES: Record<string, Theme> = {
   },
   tech: {
     article: "max-width: 860px; margin: 0 auto; color: #0f172a; font-size: 15px; line-height: 1.8;",
-    h1: "font-size: 19px; line-height: 1.35; margin: 1.25em 0 0.68em; color: #111827;",
-    h2: "font-size: 16px; line-height: 1.4; margin: 1.2em 0 0.62em; color: #111827; border-bottom: 2px solid #0ea5e9; padding-bottom: 4px;",
-    h3: "font-size: 14px; line-height: 1.45; margin: 1.1em 0 0.52em; color: #0f172a;",
+    h1: "font-size: 20px; line-height: 1.35; margin: 1.25em 0 0.68em; color: #111827;",
+    h2: "font-size: 17px; line-height: 1.4; margin: 1.2em 0 0.62em; color: #111827; border-bottom: 2px solid #0ea5e9; padding-bottom: 4px;",
+    h3: "font-size: 15px; line-height: 1.45; margin: 1.1em 0 0.52em; color: #0f172a;",
     p: "margin: 0.82em 0; font-size: 15px;",
     li: "margin: 0.32em 0; font-size: 15px;",
     blockquote:
-      "margin: 1em 0; padding: 0.62em 0.82em; color: #0f172a; background: #eff8ff; border: 1px solid #c6e6ff; border-left: 2px solid #0ea5e9; border-radius: 0; font-size: 12px;",
+      "margin: 1em 0; padding: 0.62em 0.82em; color: #0f172a; background: #eff8ff; border: 1px solid #c6e6ff; border-left: 2px solid #0ea5e9; border-radius: 0; font-size: 13px;",
     code_inline: "font-family: Menlo, Consolas, monospace; font-size: 0.92em; background: #eef2ff; color: #1e3a8a; padding: 0.1em 0.34em; border-radius: 4px;",
     pre: "margin: 1em 0; padding: 1em; background: #0f172a; color: #dbeafe; border-radius: 8px; overflow-x: auto; line-height: 1.58;",
     hr: "border: none; border-top: 1px solid #cbd5e1; margin: 1.15em 0;",
@@ -66,13 +66,13 @@ export const THEMES: Record<string, Theme> = {
   },
   warm: {
     article: "max-width: 860px; margin: 0 auto; color: #3b2f2f; font-size: 15px; line-height: 1.82;",
-    h1: "font-size: 19px; line-height: 1.35; margin: 1.3em 0 0.7em; color: #5f2d1b;",
-    h2: "font-size: 16px; line-height: 1.42; margin: 1.2em 0 0.64em; color: #7a3118; border-left: 4px solid #d97706; padding-left: 10px;",
-    h3: "font-size: 14px; line-height: 1.46; margin: 1.1em 0 0.55em; color: #8a3d1f;",
+    h1: "font-size: 20px; line-height: 1.35; margin: 1.3em 0 0.7em; color: #5f2d1b;",
+    h2: "font-size: 17px; line-height: 1.42; margin: 1.2em 0 0.64em; color: #7a3118; border-left: 4px solid #d97706; padding-left: 10px;",
+    h3: "font-size: 15px; line-height: 1.46; margin: 1.1em 0 0.55em; color: #8a3d1f;",
     p: "margin: 0.86em 0; font-size: 15px;",
     li: "margin: 0.36em 0; font-size: 15px;",
     blockquote:
-      "margin: 1em 0; padding: 0.62em 0.82em; color: #7a3118; background: #fff7eb; border: 1px solid #f6d8b6; border-left: 2px solid #d97706; border-radius: 0; font-size: 12px;",
+      "margin: 1em 0; padding: 0.62em 0.82em; color: #7a3118; background: #fff7eb; border: 1px solid #f6d8b6; border-left: 2px solid #d97706; border-radius: 0; font-size: 13px;",
     code_inline: "font-family: Menlo, Consolas, monospace; font-size: 0.92em; background: #fff3e0; color: #7c2d12; padding: 0.1em 0.34em; border-radius: 4px;",
     pre: "margin: 1em 0; padding: 1em; background: #402217; color: #fdecd6; border-radius: 8px; overflow-x: auto; line-height: 1.6;",
     hr: "border: none; border-top: 1px solid #f3d3b0; margin: 1.2em 0;",
@@ -87,13 +87,13 @@ export const THEMES: Record<string, Theme> = {
   },
   apple: {
     article: "max-width: 820px; margin: 0 auto; color: #1d1d1f; font-size: 15px; line-height: 1.82; letter-spacing: 0.01em;",
-    h1: "font-size: 19px; line-height: 1.28; margin: 1.35em 0 0.72em; color: #1d1d1f; font-weight: 700;",
-    h2: "font-size: 16px; line-height: 1.35; margin: 1.25em 0 0.66em; color: #1d1d1f; font-weight: 650;",
-    h3: "font-size: 14px; line-height: 1.42; margin: 1.15em 0 0.58em; color: #2c2c2e; font-weight: 600;",
+    h1: "font-size: 20px; line-height: 1.28; margin: 1.35em 0 0.72em; color: #1d1d1f; font-weight: 700;",
+    h2: "font-size: 17px; line-height: 1.35; margin: 1.25em 0 0.66em; color: #1d1d1f; font-weight: 650;",
+    h3: "font-size: 15px; line-height: 1.42; margin: 1.15em 0 0.58em; color: #2c2c2e; font-weight: 600;",
     p: "margin: 0.95em 0; font-size: 15px;",
     li: "margin: 0.42em 0; font-size: 15px;",
     blockquote:
-      "margin: 1em 0; padding: 0.62em 0.82em; color: #2c2c2e; background: #f5f7fb; border: 1px solid #dfe3ea; border-left: 1.5px solid #8d96a6; border-radius: 0; font-size: 12px;",
+      "margin: 1em 0; padding: 0.62em 0.82em; color: #2c2c2e; background: #f5f7fb; border: 1px solid #dfe3ea; border-left: 1.5px solid #8d96a6; border-radius: 0; font-size: 13px;",
     code_inline: "font-family: SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.91em; background: #f2f2f5; color: #1f1f22; padding: 0.1em 0.34em; border-radius: 5px;",
     pre: "margin: 1.05em 0; padding: 1.02em; background: #1c1c1e; color: #f5f5f7; border-radius: 10px; overflow-x: auto; line-height: 1.6;",
     hr: "border: none; border-top: 1px solid #e5e5ea; margin: 1.35em 0;",
@@ -110,15 +110,15 @@ export const THEMES: Record<string, Theme> = {
     article:
       "max-width: 680px; margin: 0 auto; width: 100%; box-sizing: border-box; background-color: #ffffff; border-radius: 12px; padding: 8px; color: #333333; font-size: 15px; line-height: 1.75; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;",
     h1:
-      "display: block; font-size: 19px; font-weight: 700; color: #163325; line-height: 1.32; margin: 36px 0 16px; letter-spacing: -0.015em; padding: 12px 16px 10px; background: linear-gradient(180deg, rgba(7,193,96,0.08) 0%, rgba(7,193,96,0.03) 100%); border-left: 5px solid #07c160; border-bottom: 1px dashed rgba(22,51,37,0.2); border-radius: 12px; box-shadow: 0 6px 14px rgba(7,193,96,0.05);",
+      "display: block; font-size: 20px; font-weight: 700; color: #163325; line-height: 1.32; margin: 36px 0 16px; letter-spacing: -0.015em; padding: 12px 16px 10px; background: linear-gradient(180deg, rgba(7,193,96,0.08) 0%, rgba(7,193,96,0.03) 100%); border-left: 5px solid #07c160; border-bottom: 1px dashed rgba(22,51,37,0.2); border-radius: 12px; box-shadow: 0 6px 14px rgba(7,193,96,0.05);",
     h2:
-      "display: block; font-size: 16px; font-weight: 700; color: #067647; line-height: 1.4; margin: 34px 0 18px; padding: 10px 14px; background: linear-gradient(90deg, rgba(7,193,96,0.12) 0%, rgba(7,193,96,0.03) 70%, rgba(7,193,96,0) 100%); border-left: 4px solid #07c160; border-radius: 12px;",
-    h3: "display: block; font-size: 14px; font-weight: 700; color: #0a6c44; line-height: 1.42; margin: 28px 0 14px; padding-left: 10px; border-left: 3px solid rgba(7,193,96,0.5);",
+      "display: block; font-size: 17px; font-weight: 700; color: #067647; line-height: 1.4; margin: 34px 0 18px; padding: 10px 14px; background: linear-gradient(90deg, rgba(7,193,96,0.12) 0%, rgba(7,193,96,0.03) 70%, rgba(7,193,96,0) 100%); border-left: 4px solid #07c160; border-radius: 12px;",
+    h3: "display: block; font-size: 15px; font-weight: 700; color: #0a6c44; line-height: 1.42; margin: 28px 0 14px; padding-left: 10px; border-left: 3px solid rgba(7,193,96,0.5);",
     p: "margin: 18px 0; line-height: 1.75; color: #333333; font-size: 15px;",
     li: "margin: 0.36em 0; color: #333333; font-size: 15px;",
     blockquote:
-      "margin: 1em 0; padding: 0.62em 0.82em; color: #1f4d37; background: #f0fbf5; border: 1px solid #cae9d8; border-left: 2px solid #07c160; border-radius: 0; font-size: 12px;",
-    code_inline: "font-family: 'SF Mono', Menlo, Consolas, monospace; padding: 3px 6px; background-color: #f0f7f2; color: #07c160; border-radius: 4px; font-size: 12px; line-height: 1.5;",
+      "margin: 1em 0; padding: 0.62em 0.82em; color: #1f4d37; background: #f0fbf5; border: 1px solid #cae9d8; border-left: 2px solid #07c160; border-radius: 0; font-size: 13px;",
+    code_inline: "font-family: 'SF Mono', Menlo, Consolas, monospace; padding: 3px 6px; background-color: #f0f7f2; color: #07c160; border-radius: 4px; font-size: 13px; line-height: 1.5;",
     pre: "margin: 1.05em 0; padding: 1em; background: #0f2d1f; color: #ecfff4; border-radius: 8px; overflow-x: auto; line-height: 1.6;",
     hr: "margin: 36px auto; border: none; height: 2px; width: 62%; background: linear-gradient(90deg, rgba(7,193,96,0) 0%, rgba(7,193,96,0.22) 20%, rgba(7,193,96,0.68) 50%, rgba(7,193,96,0.22) 80%, rgba(7,193,96,0) 100%);",
     a: "color: #067647; text-decoration: none; border-bottom: 1px solid rgba(7,193,96,0.45);",
