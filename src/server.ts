@@ -39,7 +39,7 @@ Step 1 — 获取 access_token
   同一次任务保存复用，无需重复获取（有效期 7200 秒）。
 
 Step 2 — 转换 Markdown 并自动上传本地图片
-  convert_markdown_to_wechat_html(markdown_path, access_token, theme?, title?, font_size_preset?)
+  convert_markdown_to_wechat_html(markdown_path, access_token, theme?, font_size_preset?)
   传入 access_token 后，![alt](./local/path) 形式的本地图片自动上传并替换为微信 CDN URL。
   返回：content[0].text（HTML）、content[1].text（可见元信息）、meta.cacheHtmlPath（缓存文件路径）。
 
@@ -81,7 +81,6 @@ export function createServer(): McpServer {
         markdown: z.string().optional().describe("Source markdown text. If both markdown and markdown_path are provided, markdown is used."),
         markdown_path: z.string().optional().describe("Local markdown file path. Use this to avoid sending full content through tokens."),
         theme: themeSchema.optional().default("default").describe("Theme name: default | tech | warm | apple | wechat-native"),
-        title: z.string().optional().describe("Optional article title rendered as h1"),
         font_size_preset: fontSizePresetSchema.optional().default("medium").describe("Font size preset: small | medium | large"),
         access_token: z.string().optional().describe("WeChat API access token. When provided, local images referenced as ![alt](./path) are automatically uploaded to WeChat CDN and replaced with permanent URLs.")
       }
@@ -152,7 +151,6 @@ export function createServer(): McpServer {
         markdown: z.string().optional().describe("Source markdown text. If both markdown and markdown_path are provided, markdown is used."),
         markdown_path: z.string().optional().describe("Local markdown file path"),
         theme: themeSchema.optional().default("default").describe("Theme name: default | tech | warm | apple | wechat-native"),
-        title: z.string().optional().describe("Optional rendered h1 title for HTML"),
         font_size_preset: fontSizePresetSchema.optional().default("medium").describe("Font size preset: small | medium | large"),
         thumb_media_id: z.string().optional().describe("Optional explicit thumb media id override."),
         author: z.string().optional().describe("Author name"),

@@ -652,7 +652,6 @@ export async function handleToolCall(name: string, args: Record<string, unknown>
     }
     const fontSizePreset = fontSizePresetArg as FontSizePreset;
 
-    const title = typeof args.title === "string" ? args.title : undefined;
     const accessToken = typeof args.access_token === "string" ? args.access_token.trim() : undefined;
 
     const baseDir = typeof markdownPath === "string" ? dirname(markdownPath) : process.cwd();
@@ -687,7 +686,9 @@ export async function handleToolCall(name: string, args: Record<string, unknown>
       markdown = rewriteLocalMarkdownImageSources(markdown, baseDir);
     }
 
-    const html = parseMarkdown(markdown, theme, title, fontSizePreset);
+    // MCP conversion intentionally does not inject a separate in-body title.
+    // Article title should come from Markdown H1 parsing and/or draft metadata.
+    const html = parseMarkdown(markdown, theme, undefined, fontSizePreset);
     const savedPath = saveHtmlCache(html);
 
     const visibleMetaLines = [`cacheHtmlPath=${savedPath}`];
