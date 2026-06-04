@@ -194,7 +194,7 @@ describe("wechat_markdown_to_draft", () => {
     expect(result.isError).not.toBe(true);
     const [, articlesArg] = apiMocks.draftAdd.mock.calls[0] as [string, Array<Record<string, unknown>>];
     const html = String(articlesArg[0]?.content);
-    expect(html).toContain("font-size: 13.5px");
+    expect(html).toContain("font-size: 14.4px");
   });
 
   it("falls back to first markdown h1 when article_title is omitted", async () => {
