@@ -258,4 +258,37 @@ describe("tools", () => {
     expect(result.isError).toBe(true);
     expect(result.content[0]?.text).toContain("article_title is required when markdown has no leading H1");
   });
+
+  it("passes image_info through for newspic drafts", async () => {
+    apiMocks.draftAdd.mockResolvedValue({ media_id: "draft_newspic" });
+    const result = await handleToolCall("wechat_draft_add", {
+      access_token: "token",
+      articles: [
+        {
+          article_type: "newspic",
+          title: "图片消息",
+          content: "",
+          image_info: {
+            image_list: [{ image_media_id: "img_1" }, { image_media_id: "img_2" }]
+          }
+        }
+      ]
+    });
+    expect(result.isError).toBeFalsy();
+    expect(apiMocks.draftAdd).toHaveBeenCalledTimes(1);
+    const [, articlesArg] = apiMocks.draftAdd.mock.calls[0] as [string, Array<Record<string, unknown>>];
+    expect(articlesArg[0]).toMatchObject({
+      article_type: "newspic",
+      image_info: { image_list: [{ image_media_id: "img_1" }, { image_media_id: "img_2" }] }
+    });
+  });
+
+  it("rejects newspic drafts without image_info.image_list", async () => {
+    const result = await handleToolCall("wechat_draft_add", {
+      access_token: "token",
+      articles: [{ article_type: "newspic", title: "缺图", content: "" }]
+    });
+    expect(result.isError).toBe(true);
+    expect(result.content[0]?.text).toContain("image_info.image_list");
+  });
 });

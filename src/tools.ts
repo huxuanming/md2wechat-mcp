@@ -759,6 +759,15 @@ export async function handleToolCall(name: string, args: Record<string, unknown>
     if (!Array.isArray(articles) || articles.length === 0) {
       return { content: [{ type: "text", text: "articles must be a non-empty array." }], isError: true };
     }
+    const missingImageInfo = articles.some(
+      (article: Record<string, unknown>) => article.article_type === "newspic" && !Array.isArray((article.image_info as { image_list?: unknown } | undefined)?.image_list)
+    );
+    if (missingImageInfo) {
+      return {
+        content: [{ type: "text", text: "article_type=newspic requires image_info.image_list (array of { image_media_id }, max 20)." }],
+        isError: true
+      };
+    }
     try {
       const result = await draftAdd(accessToken, articles as WechatArticle[]);
       return { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] };

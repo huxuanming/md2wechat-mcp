@@ -23,6 +23,10 @@ export interface WechatArticle {
   thumb_media_id?: string;
   need_open_comment?: 0 | 1;
   only_fans_can_comment?: 0 | 1;
+  /** 图片消息（article_type=newspic）专用：图片列表，最多 20 张，首张为封面。 */
+  image_info?: {
+    image_list: Array<{ image_media_id: string }>;
+  };
 }
 
 async function wechatFetch<T>(url: string, options?: RequestInit): Promise<T> {

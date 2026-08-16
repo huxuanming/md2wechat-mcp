@@ -117,7 +117,17 @@ export function createServer(): McpServer {
     content_source_url: z.string().optional().describe("Original article URL (max 1024 chars)"),
     thumb_media_id: z.string().optional().describe("Cover image media ID obtained from WeChat material upload API"),
     need_open_comment: z.union([z.literal(0), z.literal(1)]).optional().describe("Enable comments: 1 = yes, 0 = no"),
-    only_fans_can_comment: z.union([z.literal(0), z.literal(1)]).optional().describe("Only followers can comment: 1 = yes, 0 = no")
+    only_fans_can_comment: z.union([z.literal(0), z.literal(1)]).optional().describe("Only followers can comment: 1 = yes, 0 = no"),
+    image_info: z
+      .object({
+        image_list: z
+          .array(z.object({ image_media_id: z.string().describe("Permanent image material media ID (from wechat_add_material type=image)") }))
+          .min(1)
+          .max(20)
+          .describe("Image list for newspic drafts, max 20, first is the cover.")
+      })
+      .optional()
+      .describe("Required for article_type=newspic (image message draft).")
   });
 
   server.registerTool(
