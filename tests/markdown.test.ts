@@ -38,6 +38,15 @@ describe("parseMarkdown", () => {
     expect(html).toContain("外部标题");
   });
 
+  it("centers ordinary paragraphs wrapped in center tags", () => {
+    const html = parseMarkdown("<center>这是**居中**文字</center>", "default");
+
+    expect(html).toContain("text-align: center;");
+    expect(html).toContain("这是<strong");
+    expect(html).not.toContain("&lt;center&gt;");
+    expect(html).not.toContain("&lt;/center&gt;");
+  });
+
   it("supports font size preset scaling", () => {
     const small = parseMarkdown("正文", "default", undefined, "small");
     const large = parseMarkdown("正文", "default", undefined, "large");

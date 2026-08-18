@@ -106,7 +106,12 @@ export function parseMarkdown(md: string, themeName = "default", title?: string,
     if (paragraphBuffer.length > 0) {
       const text = paragraphBuffer.map((part) => part.trim()).join(" ").trim();
       if (text) {
-        out.push(`<p style=\"${theme.p}\">${inlineFormat(text, theme)}</p>`);
+        const centered = text.match(/^<center\b[^>]*>([\s\S]*?)<\/center>$/iu);
+        if (centered) {
+          out.push(`<p style=\"${theme.p} text-align: center;\">${inlineFormat(centered[1]?.trim() ?? "", theme)}</p>`);
+        } else {
+          out.push(`<p style=\"${theme.p}\">${inlineFormat(text, theme)}</p>`);
+        }
       }
     }
     paragraphBuffer = [];
