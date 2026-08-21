@@ -114,6 +114,43 @@ describe("parseMarkdown", () => {
     expect(html).toContain('title="Example Site"');
   });
 
+  it("renders inline hashtags as WeChat topic quick-inserts", () => {
+    const html = parseMarkdown("今日分享 #搞笑漫画，欢迎留言。", "default");
+
+    expect(html).toContain(
+      '<span leaf=""><a class="wx_topic_link" data-topic="1" data-recommend="" href="javascript:;">#搞笑漫画</a> </span>'
+    );
+  });
+
+  it("accepts a space between an inline topic marker and its name", () => {
+    const html = parseMarkdown("今天聊聊 # 无厘头。", "default");
+
+    expect(html).toContain('class="wx_topic_link"');
+    expect(html).toContain('>#无厘头</a>');
+  });
+
+  it("keeps a line-start hash followed by a space as a heading", () => {
+    const html = parseMarkdown("# 无厘头", "default");
+
+    expect(html).toContain("<h1");
+    expect(html).not.toContain('class="wx_topic_link"');
+  });
+
+  it("does not convert hashtags inside inline code", () => {
+    const html = parseMarkdown("使用 `#搞笑漫画` 作为示例。", "default");
+
+    expect(html).toContain('<code');
+    expect(html).toContain('#搞笑漫画');
+    expect(html).not.toContain('class="wx_topic_link"');
+  });
+
+  it("does not convert URL fragments into topics", () => {
+    const html = parseMarkdown("[章节](https://example.com/article#section)", "default");
+
+    expect(html).toContain('href="https://example.com/article#section"');
+    expect(html).not.toContain('class="wx_topic_link"');
+  });
+
   it("renders Chinese quoted blockquote lines", () => {
     const md = '> “我的车明明还有 30% 的电，怎么突然就报警停机了？”';
     const html = parseMarkdown(md, "default");

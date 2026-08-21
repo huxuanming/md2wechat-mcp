@@ -39,7 +39,7 @@ export function inlineFormat(text: string, theme: Theme): string {
     (_m, label: string, href: string, t1?: string, t2?: string, t3?: string, t4?: string) => {
       const title = t1 ?? t2 ?? t3 ?? t4;
       const titleAttr = title ? ` title=\"${title}\"` : "";
-      return `<a href=\"${href}\"${titleAttr} style=\"${theme.a}\">${label}</a>`;
+      return stash(`<a href=\"${href}\"${titleAttr} style=\"${theme.a}\">${label}</a>`);
     }
   );
 
@@ -50,6 +50,14 @@ export function inlineFormat(text: string, theme: Theme): string {
   escaped = escaped.replace(/\*([^*]+)\*/g, (_m, content: string) => {
     return `<em style=\"${theme.em}\">${content}</em>`;
   });
+
+  // WeChat recognizes this exact anchor shape as a topic quick-insert. Keep the
+  // topic marker in the visible text so the editor can bind it to the topic.
+  escaped = escaped.replace(
+    /(^|[^\p{L}\p{N}_#-])#\s*([\p{L}\p{N}_-]+)/gu,
+    (_m, prefix: string, topic: string) =>
+      `${prefix}<span leaf=\"\"><a class=\"wx_topic_link\" data-topic=\"1\" data-recommend=\"\" href=\"javascript:;\">#${topic}</a> </span>`
+  );
 
   for (const [key, value] of placeholders) {
     escaped = escaped.replaceAll(key, value);
