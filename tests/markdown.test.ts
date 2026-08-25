@@ -38,6 +38,13 @@ describe("parseMarkdown", () => {
     expect(html).toContain("外部标题");
   });
 
+  it("uses bottom-only spacing for paragraphs", () => {
+    const html = parseMarkdown("第一段\n\n第二段", "default");
+
+    expect(html).toContain('<p style="margin: 0 0 0.85em; font-size: 16px;">第一段</p>');
+    expect(html).not.toContain('style="margin: 0.85em 0;');
+  });
+
   it("centers ordinary paragraphs wrapped in center tags", () => {
     const html = parseMarkdown("<center>这是**居中**文字</center>", "default");
 

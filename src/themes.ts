@@ -27,7 +27,7 @@ export const THEMES: Record<string, Theme> = {
     h1: "font-size: 20px; line-height: 1.35; margin: 1.3em 0 0.7em; color: #102a43;",
     h2: "font-size: 17px; line-height: 1.4; margin: 1.2em 0 0.65em; color: #16324f; border-left: 4px solid #1f6feb; padding-left: 10px;",
     h3: "font-size: 16px; line-height: 1.45; margin: 1.1em 0 0.55em; color: #1f4b7a;",
-    p: "margin: 0.85em 0; font-size: 16px;",
+    p: "margin: 0 0 0.85em; font-size: 16px;",
     li: "margin: 0.35em 0; font-size: 16px;",
     blockquote:
       "margin: 1em 0; padding: 0.62em 0.82em; color: #1f4b7a; background: #eef6ff; border: 1px solid #c6dcf6; border-left: 2px solid #1f6feb; border-radius: 0; font-size: 13px;",
@@ -48,7 +48,7 @@ export const THEMES: Record<string, Theme> = {
     h1: "font-size: 20px; line-height: 1.35; margin: 1.25em 0 0.68em; color: #111827;",
     h2: "font-size: 17px; line-height: 1.4; margin: 1.2em 0 0.62em; color: #111827; border-bottom: 2px solid #0ea5e9; padding-bottom: 4px;",
     h3: "font-size: 16px; line-height: 1.45; margin: 1.1em 0 0.52em; color: #0f172a;",
-    p: "margin: 0.82em 0; font-size: 16px;",
+    p: "margin: 0 0 0.82em; font-size: 16px;",
     li: "margin: 0.32em 0; font-size: 16px;",
     blockquote:
       "margin: 1em 0; padding: 0.62em 0.82em; color: #0f172a; background: #eff8ff; border: 1px solid #c6e6ff; border-left: 2px solid #0ea5e9; border-radius: 0; font-size: 13px;",
@@ -69,7 +69,7 @@ export const THEMES: Record<string, Theme> = {
     h1: "font-size: 20px; line-height: 1.35; margin: 1.3em 0 0.7em; color: #5f2d1b;",
     h2: "font-size: 17px; line-height: 1.42; margin: 1.2em 0 0.64em; color: #7a3118; border-left: 4px solid #d97706; padding-left: 10px;",
     h3: "font-size: 16px; line-height: 1.46; margin: 1.1em 0 0.55em; color: #8a3d1f;",
-    p: "margin: 0.86em 0; font-size: 16px;",
+    p: "margin: 0 0 0.86em; font-size: 16px;",
     li: "margin: 0.36em 0; font-size: 16px;",
     blockquote:
       "margin: 1em 0; padding: 0.62em 0.82em; color: #7a3118; background: #fff7eb; border: 1px solid #f6d8b6; border-left: 2px solid #d97706; border-radius: 0; font-size: 13px;",
@@ -90,7 +90,7 @@ export const THEMES: Record<string, Theme> = {
     h1: "font-size: 20px; line-height: 1.28; margin: 1.35em 0 0.72em; color: #1d1d1f; font-weight: 700;",
     h2: "font-size: 17px; line-height: 1.35; margin: 1.25em 0 0.66em; color: #1d1d1f; font-weight: 650;",
     h3: "font-size: 16px; line-height: 1.42; margin: 1.15em 0 0.58em; color: #2c2c2e; font-weight: 600;",
-    p: "margin: 0.95em 0; font-size: 16px;",
+    p: "margin: 0 0 0.95em; font-size: 16px;",
     li: "margin: 0.42em 0; font-size: 16px;",
     blockquote:
       "margin: 1em 0; padding: 0.62em 0.82em; color: #2c2c2e; background: #f5f7fb; border: 1px solid #dfe3ea; border-left: 1.5px solid #8d96a6; border-radius: 0; font-size: 13px;",
@@ -114,7 +114,7 @@ export const THEMES: Record<string, Theme> = {
     h2:
       "display: block; font-size: 17px; font-weight: 700; color: #067647; line-height: 1.4; margin: 34px 0 18px; padding: 10px 14px; background: linear-gradient(90deg, rgba(7,193,96,0.12) 0%, rgba(7,193,96,0.03) 70%, rgba(7,193,96,0) 100%); border-left: 4px solid #07c160; border-radius: 12px;",
     h3: "display: block; font-size: 16px; font-weight: 700; color: #0a6c44; line-height: 1.42; margin: 28px 0 14px; padding-left: 10px; border-left: 3px solid rgba(7,193,96,0.5);",
-    p: "margin: 18px 0; line-height: 1.75; color: #333333; font-size: 16px;",
+    p: "margin: 0 0 18px; line-height: 1.75; color: #333333; font-size: 16px;",
     li: "margin: 0.36em 0; color: #333333; font-size: 16px;",
     blockquote:
       "margin: 1em 0; padding: 0.62em 0.82em; color: #1f4d37; background: #f0fbf5; border: 1px solid #cae9d8; border-left: 2px solid #07c160; border-radius: 0; font-size: 13px;",
