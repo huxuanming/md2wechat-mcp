@@ -30,7 +30,7 @@ export function inlineFormat(text: string, theme: Theme): string {
     (_m, alt: string, src: string, t1?: string, t2?: string, t3?: string, t4?: string) => {
       const title = t1 ?? t2 ?? t3 ?? t4;
       const titleAttr = title ? ` title=\"${title}\"` : "";
-      return stash(`<img src=\"${src}\" alt=\"${alt}\"${titleAttr} style=\"max-width:100%;height:auto;display:block;margin:0.8em auto;\" />`);
+      return stash(`<img src=\"${src}\" alt=\"${alt}\"${titleAttr} style=\"max-width:100%;height:auto;display:block;margin:0 auto;\" />`);
     }
   );
 
