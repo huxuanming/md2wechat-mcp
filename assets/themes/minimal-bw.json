@@ -9,7 +9,7 @@
     "h3": "font-size: 15.5px; font-weight: 700; color: #000000; margin: 28px 0 12px; padding: 0 0 0 14px; line-height: 1.5; letter-spacing: 0.2px; border-left: 2px solid #000000;",
     "p": "margin: 16px 0; text-indent: 0; text-align: justify; color: #1a1a1a; line-height: 1.85;",
     "blockquote": "margin: 26px 0; padding: 2px 0 2px 20px; background: transparent; border-left: 2px solid #000000; color: #1a1a1a; font-size: 15px; border-radius: 0; line-height: 1.8; letter-spacing: 0.2px; font-style: normal;",
-    "img": "max-width: 100%; height: auto; border-radius: 0; margin: 24px auto; display: block; border: 1px solid #e5e5e5;",
+    "img": "max-width: 100%; height: auto; display: block;",
     "strong": "color: #000000; font-weight: 800;",
     "em": "font-style: italic; color: #3a3a3a;",
     "code_inline": "background: #f2f2f2; color: #000000; padding: 1px 6px; border-radius: 2px; font-size: 13px; font-family: 'JetBrains Mono', 'Menlo', 'Consolas', monospace; border: 1px solid #e5e5e5;",

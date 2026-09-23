@@ -11,7 +11,7 @@
     "h3": "font-size: 16px; line-height: 1.5; margin: 25px 0 11px; color: #0f172a; font-weight: 700; font-family: 'SFMono-Regular', Menlo, Consolas, monospace;",
     "p": "margin: 0 0 16px; font-size: 16px; line-height: 1.82; color: #0f172a;",
     "blockquote": "margin: 22px 0; padding: 16px 18px; color: #164e63; background: #ecfeff; border: 1px solid #bae6fd; border-left: 3px solid #0ea5e9; border-radius: 4px; font-size: 14px; line-height: 1.78;",
-    "img": "max-width: 100%; height: auto; border-radius: 6px; margin: 22px auto; display: block; border: 1px solid #cbd5e1; box-shadow: 0 8px 20px rgba(14,165,233,0.08);",
+    "img": "max-width: 100%; height: auto; display: block; box-shadow: 0 8px 20px rgba(14,165,233,0.08);",
     "strong": "font-weight: 700; color: #1d4ed8;",
     "em": "font-style: italic; color: #0c4a6e;",
     "code_inline": "font-family: Menlo, Consolas, monospace; font-size: 0.92em; background: #eef2ff; color: #1e3a8a; padding: 0.1em 0.34em; border-radius: 4px;",

@@ -123,6 +123,22 @@ describe("parseMarkdown", () => {
     expect(html).not.toMatch(/<p[^>]*>\s*<img/u);
   });
 
+
+  it("renders consecutive comic images without theme spacing, borders or rounded corners", () => {
+    const html = parseMarkdown(
+      ["![第一格](https://example.com/1.jpg)", "![第二格](https://example.com/2.jpg)"].join("\n"),
+      "minimal-mono"
+    );
+
+    expect(html.match(/<img\b/gu)).toHaveLength(2);
+    expect(html).toMatch(/<img[^>]+1\.jpg[^>]*\/>\n<img[^>]+2\.jpg[^>]*\/>/u);
+    const imageStyles = [...html.matchAll(/<img[^>]*style="([^"]*)"/gu)].map((match) => match[1] ?? "");
+    expect(imageStyles).toHaveLength(2);
+    for (const imageStyle of imageStyles) {
+      expect(imageStyle).not.toMatch(/(?:^|;)\s*(?:border|margin|border-radius)\s*:/u);
+    }
+  });
+
   it("renders link with optional title", () => {
     const md = '[官网](https://example.com "Example Site")';
     const html = parseMarkdown(md, "default");
@@ -198,7 +214,9 @@ describe("parseMarkdown", () => {
     expect(html).toContain("一");
     expect(html).toContain("※");
     expect(html).toContain("https://example.com/theme.jpg");
-    expect(html).toContain("border-radius: 2px");
+    const imageStyle = html.match(/<img[^>]*style="([^"]*)"/u)?.[1] ?? "";
+    expect(imageStyle).toContain("max-width: 100%; height: auto; display: block;");
+    expect(imageStyle).not.toMatch(/(?:^|;)\s*(?:border|margin|border-radius)\s*:/u);
     expect(html).not.toContain("==黄色高亮==");
     expect(html).not.toContain("!!红色强调!!");
   });

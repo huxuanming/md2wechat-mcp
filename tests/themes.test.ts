@@ -121,6 +121,16 @@ describe("theme registry", () => {
     }
   });
 
+  it("keeps every theme image flush for consecutive comic panels", () => {
+    for (const metadata of THEME_METADATA) {
+      const imageStyle = resolveTheme(metadata.name).img;
+      expect(imageStyle).toContain("max-width: 100%");
+      expect(imageStyle).toContain("height: auto");
+      expect(imageStyle).toContain("display: block");
+      expect(imageStyle).not.toMatch(/(?:^|;)\s*(?:border|margin|border-radius)\s*:/u);
+    }
+  });
+
   it("adds safe horizontal padding and complete classic code typography", () => {
     for (const metadata of THEME_METADATA) {
       expect(resolveTheme(metadata.name).article).toContain("padding-left: 18px; padding-right: 18px;");
