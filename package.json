@@ -1,6 +1,6 @@
 {
   "name": "md2wechat-mcp",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "directories": {
     "test": "tests"
   },
