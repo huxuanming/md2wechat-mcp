@@ -1,5 +1,6 @@
 {
   "theme_name": "ink-wash",
+  "display_name": "古风水墨",
   "description": "古风水墨 - 米黄纸 + 朱砂宋体,中式留白美学,适合传统文化 / 人文 / 诗意随笔",
   "styles": {
     "body": "font-family: 'Noto Serif SC', 'Source Han Serif SC', 'Songti SC', 'STSong', 'PingFang SC', serif; font-size: 16px; color: #2b2420; line-height: 2.0; letter-spacing: 0.8px; word-spacing: 2px; padding: 20px 22px; background: #f8f3e8;",

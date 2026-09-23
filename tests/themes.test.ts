@@ -46,6 +46,17 @@ describe("theme registry", () => {
     expect(Object.keys(THEMES).sort()).toEqual(jsonNames);
   });
 
+  it("provides a unique Chinese display name for every English theme name", () => {
+    const displayNames = new Set<string>();
+    for (const metadata of THEME_METADATA) {
+      const data = readThemeJson(metadata.name);
+      expect(metadata.display_name.trim().length).toBeGreaterThan(0);
+      expect(data.display_name).toBe(metadata.display_name);
+      displayNames.add(metadata.display_name);
+    }
+    expect(displayNames.size).toBe(THEME_METADATA.length);
+  });
+
   it("keeps all classic names and marks them as classic themes", () => {
     expect(THEME_NAMES.slice(0, classicNames.length)).toEqual(classicNames);
     for (const name of classicNames) {

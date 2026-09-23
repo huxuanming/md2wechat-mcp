@@ -4,6 +4,11 @@
   "directories": {
     "test": "tests"
   },
+  "files": [
+    "dist/*.js",
+    "assets/themes/*.json",
+    "assets/themes/README.md"
+  ],
   "scripts": {
     "test": "vitest run",
     "build": "rm -rf dist && tsc -p tsconfig.build.json",

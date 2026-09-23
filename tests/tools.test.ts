@@ -44,6 +44,8 @@ describe("tools", () => {
     expect(payload.themes.some((x) => x.name === "wechat-native")).toBe(true);
     expect(payload.themes.some((x) => x.name === "refined-blue")).toBe(true);
     expect(payload.themes.some((x) => x.name === "ink-wash")).toBe(true);
+    expect(payload.themes.find((x) => x.name === "default")?.display_name).toBe("经典蓝调");
+    expect(payload.themes.find((x) => x.name === "refined-blue")?.display_name).toBe("精致蓝调");
     expect(payload.themes.find((x) => x.name === "default")?.description).toContain("经典主题");
   });
 

@@ -1,5 +1,6 @@
 {
   "theme_name": "minimal-mono",
+  "display_name": "极简等宽",
   "description": "极简等宽 - 纯黑白 + 等宽字,偏工程师审美,适合技术 / 工程 / 开发类长文",
   "styles": {
     "body": "font-family: 'JetBrains Mono', 'Menlo', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', sans-serif; font-size: 15px; color: #1a1a1a; line-height: 1.8; letter-spacing: 0.3px; word-spacing: 1px; padding: 20px 22px; background: #ffffff;",

@@ -1,5 +1,6 @@
 {
   "theme_name": "minimal-bw",
+  "display_name": "极简黑白",
   "description": "极简黑白 - 瑞士现代主义 · Helvetica,只用粗细 / 留白 / 对齐做层级,适合 essay / 观点 / 技术长文",
   "styles": {
     "body": "font-family: 'Helvetica Neue', Helvetica, 'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; font-size: 15.5px; color: #1a1a1a; line-height: 1.8; letter-spacing: 0.3px; word-spacing: 1px; padding: 20px 22px; background: #ffffff;",

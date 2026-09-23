@@ -1,5 +1,6 @@
 {
   "theme_name": "news-bold",
+  "display_name": "新闻时讯",
   "description": "新闻时讯 - 红黑强对比 + 快节奏,信息密度高,适合资讯 / 热点 / 速读类短文",
   "styles": {
     "body": "font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; font-size: 15.5px; color: #1a1a1a; line-height: 1.8; letter-spacing: 0.3px; word-spacing: 1.5px; padding: 20px 22px; background: #ffffff;",

@@ -56,6 +56,7 @@ export type ThemeSource = "classic" | "wechat-publisher";
 
 export type ThemeMetadata = {
   name: string;
+  display_name: string;
   description: string;
   category: string;
   source: ThemeSource;
@@ -63,6 +64,7 @@ export type ThemeMetadata = {
 
 type ThemeJson = {
   theme_name: string;
+  display_name: string;
   description: string;
   category?: string;
   source?: ThemeSource;
@@ -171,6 +173,7 @@ function validateThemeJson(value: unknown, filePath: string): ThemeJson {
 
   const parsed = value as Partial<ThemeJson>;
   requireString(parsed.theme_name, "theme_name", filePath);
+  requireString(parsed.display_name, "display_name", filePath);
   requireString(parsed.description, "description", filePath);
   requireString(parsed.section_divider_text, "section_divider_text", filePath);
 
@@ -298,6 +301,7 @@ function loadThemes(): { themes: Record<string, Theme>; metadata: ThemeMetadata[
     themes[theme.theme_name] = adaptTheme(theme);
     metadata.push({
       name: theme.theme_name,
+      display_name: theme.display_name,
       description: theme.description,
       category: theme.category ?? PUBLISHER_CATEGORIES[theme.theme_name] ?? "其他",
       source

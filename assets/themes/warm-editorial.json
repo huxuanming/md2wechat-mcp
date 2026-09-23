@@ -1,5 +1,6 @@
 {
   "theme_name": "warm-editorial",
+  "display_name": "暖色杂志风",
   "description": "暖色杂志风 - 栗色 + 米白 + 宋体,温厚的长文阅读感,适合观点 / 随笔 / 生活随笔",
   "styles": {
     "body": "font-family: 'Noto Serif SC', 'Songti SC', 'Source Han Serif SC', 'PingFang SC', serif; font-size: 15.5px; color: #3a2e26; line-height: 1.9; letter-spacing: 0.5px; word-spacing: 2px; padding: 20px 22px; background: #fbf7f0;",

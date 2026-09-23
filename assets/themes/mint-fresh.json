@@ -1,5 +1,6 @@
 {
   "theme_name": "mint-fresh",
+  "display_name": "小清新薄荷",
   "description": "小清新薄荷 - 薄荷绿 + 圆角卡片,轻盈透气,适合日常 / 生活方式 / 轻话题",
   "styles": {
     "body": "font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; font-size: 15.5px; color: #1f3a33; line-height: 1.85; letter-spacing: 0.35px; word-spacing: 1.5px; padding: 20px 22px; background: #f4faf7;",

@@ -1,5 +1,6 @@
 {
   "theme_name": "academic-paper",
+  "display_name": "学术严谨",
   "description": "学术严谨 - 论文格式 + 衬线正字,章节编号式层级,适合研究 / 论述 / 严肃长文",
   "styles": {
     "body": "font-family: 'Noto Serif SC', 'Source Han Serif SC', 'Times New Roman', 'Songti SC', serif; font-size: 15.5px; color: #1a1a1a; line-height: 1.95; letter-spacing: 0.3px; word-spacing: 1.5px; padding: 20px 22px; background: #ffffff;",

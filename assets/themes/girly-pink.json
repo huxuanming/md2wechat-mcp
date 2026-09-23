@@ -1,5 +1,6 @@
 {
   "theme_name": "girly-pink",
+  "display_name": "少女粉系",
   "description": "少女粉系 - 粉紫渐变 + 可爱风,甜美轻盈,适合时尚 / 美妆 / 情感 / 少女向内容",
   "styles": {
     "body": "font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; font-size: 15.5px; color: #4a2a3e; line-height: 1.85; letter-spacing: 0.35px; word-spacing: 1.5px; padding: 20px 22px; background: #fff5fa;",

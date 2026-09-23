@@ -26,11 +26,12 @@ export type ToolResult = {
 };
 
 export function listThemesPayload(): {
-  themes: Array<{ name: string; description: string }>;
+  themes: Array<{ name: string; display_name: string; description: string }>;
 } {
   return {
-    themes: THEME_METADATA.map(({ name, description, category, source }) => ({
+    themes: THEME_METADATA.map(({ name, display_name, description, category, source }) => ({
       name,
+      display_name,
       description: `${description} · ${category} · ${source === "classic" ? "经典主题" : "Publisher 主题包"}`
     }))
   };

@@ -1,5 +1,6 @@
 {
   "theme_name": "magazine-grid",
+  "display_name": "杂志衬线",
   "description": "杂志衬线 - 衬线大标题 + 大留白,杂志内页感,适合专题报道 / 长篇深度 / 艺术人文",
   "styles": {
     "body": "font-family: 'Noto Serif SC', 'Source Han Serif SC', 'Songti SC', Georgia, serif; font-size: 15.5px; color: #1f1a14; line-height: 1.9; letter-spacing: 0.35px; word-spacing: 1.5px; padding: 20px 22px; background: #fbfaf6;",

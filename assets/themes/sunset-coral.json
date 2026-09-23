@@ -1,5 +1,6 @@
 {
   "theme_name": "sunset-coral",
+  "display_name": "夕阳珊瑚",
   "description": "夕阳珊瑚 - 暖橙 + 奶白,热烈克制的活力色,适合热点 / 榜单 / 潮流 / 轻快话题",
   "styles": {
     "body": "font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; font-size: 15.5px; color: #2b1a10; line-height: 1.8; letter-spacing: 0.35px; word-spacing: 1.5px; padding: 20px 22px; background: #fffaf5;",

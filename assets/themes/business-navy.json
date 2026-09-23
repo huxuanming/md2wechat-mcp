@@ -1,5 +1,6 @@
 {
   "theme_name": "business-navy",
+  "display_name": "商务蓝金",
   "description": "商务蓝金 - 深蓝主色 + 金色点缀,权威克制的金融感,适合商业 / 投研 / 行业分析",
   "styles": {
     "body": "font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; font-size: 15.5px; color: #0f1a33; line-height: 1.8; letter-spacing: 0.35px; word-spacing: 1.5px; padding: 20px 22px; background: #ffffff;",
