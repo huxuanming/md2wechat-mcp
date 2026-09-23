@@ -1,0 +1,60 @@
+{
+  "theme_name": "wechat-native",
+  "description": "经典微信绿 - 以微信品牌绿为核心，亲切可信、接近公众号原生语境，适合服务 / 社群 / 通用内容",
+  "category": "微信 / 通用",
+  "source": "classic",
+  "styles": {
+    "body": "font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', 'PingFang SC', sans-serif; font-size: 16px; color: #333333; line-height: 1.78; letter-spacing: 0.2px; padding: 12px; background: #ffffff; border-radius: 12px;",
+    "h1": "display: block; font-size: 20px; font-weight: 700; color: #163325; line-height: 1.32; margin: 36px 0 16px; letter-spacing: -0.015em; padding: 12px 16px 10px; background: linear-gradient(180deg, rgba(7,193,96,0.08) 0%, rgba(7,193,96,0.03) 100%); border-left: 5px solid #07c160; border-bottom: 1px dashed rgba(22,51,37,0.2); border-radius: 12px; box-shadow: 0 6px 14px rgba(7,193,96,0.05);",
+    "h2": "display: block; font-size: 17px; font-weight: 700; color: #067647; line-height: 1.4; margin: 34px 0 18px; padding: 10px 14px; background: linear-gradient(90deg, rgba(7,193,96,0.12) 0%, rgba(7,193,96,0.03) 70%, rgba(7,193,96,0) 100%); border-left: 4px solid #07c160; border-radius: 12px;",
+    "h3": "display: block; font-size: 16px; font-weight: 700; color: #0a6c44; line-height: 1.42; margin: 28px 0 14px; padding-left: 10px; border-left: 3px solid rgba(7,193,96,0.5);",
+    "p": "margin: 0 0 18px; line-height: 1.78; color: #333333; font-size: 16px;",
+    "blockquote": "margin: 22px 0; padding: 16px 18px; color: #1f4d37; background: #f0fbf5; border: 1px solid #cae9d8; border-left: 3px solid #07c160; border-radius: 0 9px 9px 0; font-size: 14.5px; line-height: 1.8;",
+    "img": "max-width: 100%; height: auto; border-radius: 10px; margin: 22px auto; display: block; border: 1px solid #d9eee3; box-shadow: 0 7px 20px rgba(7,193,96,0.09);",
+    "strong": "font-weight: 700; color: #067647; background: linear-gradient(180deg, rgba(7,193,96,0) 0%, rgba(7,193,96,0) 58%, rgba(7,193,96,0.16) 58%, rgba(7,193,96,0.16) 100%); padding: 0 3px;",
+    "em": "font-style: italic; color: #666666;",
+    "code_inline": "font-family: 'SF Mono', Menlo, Consolas, monospace; padding: 3px 6px; background-color: #f0f7f2; color: #07c160; border-radius: 4px; font-size: 13px; line-height: 1.5;",
+    "code_block": "margin: 1.05em 0; padding: 1em; background: #0f2d1f; color: #ecfff4; border-radius: 8px; overflow-x: auto; line-height: 1.6;",
+    "ul": "margin: 17px 0; padding: 0; list-style: none;",
+    "ol": "margin: 17px 0; padding: 0; list-style: none;",
+    "li": "margin: 9px 0; color: #333333; font-size: 16px; line-height: 1.8;",
+    "li_bullet": "display: inline-block; min-width: 16px; margin-right: 9px; color: #07c160; font-size: 11px; font-weight: 900;",
+    "li_bullet_char": "◆",
+    "li_number": "display: inline-block; min-width: 25px; margin-right: 9px; color: #07c160; font-size: 17px; font-weight: 800; line-height: 1; vertical-align: -1px;",
+    "hr": "margin: 36px auto; border: none; height: 2px; width: 62%; background: linear-gradient(90deg, rgba(7,193,96,0) 0%, rgba(7,193,96,0.22) 20%, rgba(7,193,96,0.68) 50%, rgba(7,193,96,0.22) 80%, rgba(7,193,96,0) 100%);",
+    "a": "color: #067647; text-decoration: none; border-bottom: 1px solid rgba(7,193,96,0.45);",
+    "table": "width: 100%; border-collapse: collapse; margin: 22px 0; font-size: 14px; border: 1px solid #cde8db; border-radius: 8px; overflow: hidden; table-layout: fixed; word-break: break-word;",
+    "th": "border: 1px solid #cde8db; padding: 8px 10px; background: #f3fbf7; text-align: left; font-weight: 700; color: #067647;",
+    "td": "border: 1px solid #cde8db; padding: 8px 10px; text-align: left; vertical-align: top;",
+    "caption": "font-size: 12.5px; color: #7a7f87; text-align: center; margin-top: 9px; line-height: 1.6;",
+    "section_divider": "text-align: center; color: #07c160; letter-spacing: 10px; font-size: 11px; margin: 36px 0; user-select: none; opacity: 0.65;"
+  },
+  "highlights": {
+    "hl_yellow": "background: linear-gradient(180deg, transparent 58%, #fff0a6 58%); color: #163325; padding: 0 3px; font-weight: 600;",
+    "hl_blue": "background: #e5f1ff; color: #1763a6; padding: 2px 7px; border-radius: 5px; font-weight: 500;",
+    "hl_pink": "background: #fde5ed; color: #a33d60; padding: 2px 7px; border-radius: 5px; font-weight: 500;",
+    "hl_green": "background: #e2f7eb; color: #067647; padding: 2px 7px; border-radius: 5px; font-weight: 600;",
+    "em_red": "color: #c43c36; font-weight: 700;",
+    "em_blue": "color: #1677b8; font-weight: 700;",
+    "em_orange": "color: #bf670b; font-weight: 700;"
+  },
+  "section_divider_text": "●  ●  ●",
+  "code_colors": {
+    "kw": "color: #5ee6a0; font-weight: 600;",
+    "str": "color: #d9f99d;",
+    "num": "color: #fda4af;",
+    "fn": "color: #93c5fd;",
+    "cls": "color: #c4b5fd;",
+    "comm": "color: #78a88c; font-style: italic;",
+    "punct": "color: #d1fae5;"
+  },
+  "list_style": {
+    "label": "微信绿圈号",
+    "num_container": "display: inline-block; min-width: 25px; margin-right: 9px; color: #07c160; font-size: 17px; font-weight: 800; line-height: 1; vertical-align: -1px;",
+    "num_prefix": "",
+    "num_suffix": "",
+    "num_formatter": "circled_filled",
+    "bullet_container": "display: inline-block; min-width: 16px; margin-right: 9px; color: #07c160; font-size: 11px; font-weight: 900;",
+    "bullet_char": "◆"
+  }
+}

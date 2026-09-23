@@ -40,8 +40,11 @@ describe("tools", () => {
 
   it("returns theme list payload", () => {
     const payload = listThemesPayload();
-    expect(payload.themes.length).toBe(5);
+    expect(payload.themes.length).toBe(20);
     expect(payload.themes.some((x) => x.name === "wechat-native")).toBe(true);
+    expect(payload.themes.some((x) => x.name === "refined-blue")).toBe(true);
+    expect(payload.themes.some((x) => x.name === "ink-wash")).toBe(true);
+    expect(payload.themes.find((x) => x.name === "default")?.description).toContain("经典主题");
   });
 
   it("returns error for invalid theme", async () => {

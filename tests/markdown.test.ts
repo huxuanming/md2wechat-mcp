@@ -41,8 +41,8 @@ describe("parseMarkdown", () => {
   it("uses bottom-only spacing for paragraphs", () => {
     const html = parseMarkdown("第一段\n\n第二段", "default");
 
-    expect(html).toContain('<p style="margin: 0 0 0.85em; font-size: 16px;">第一段</p>');
-    expect(html).not.toContain('style="margin: 0.85em 0;');
+    expect(html).toMatch(/<p style="margin: 0 0 [^;]+;/u);
+    expect(html).not.toMatch(/<p style="margin: [^0][^;]* 0;/u);
   });
 
   it("centers ordinary paragraphs wrapped in center tags", () => {
@@ -103,13 +103,24 @@ describe("parseMarkdown", () => {
     expect(html).not.toContain("<table");
   });
 
-  it("renders image with optional title", () => {
+  it("renders a standalone image directly and uses its title as a caption", () => {
     const md = '![封面](https://example.com/a.jpg "封面图")';
     const html = parseMarkdown(md, "default");
 
     expect(html).toContain("<img");
     expect(html).toContain('src="https://example.com/a.jpg"');
     expect(html).toContain('title="封面图"');
+    expect(html).toContain('text-align: center; text-indent: 0;');
+    expect(html).toContain(">封面图</p>");
+    expect(html).not.toMatch(/<p[^>]*>\s*<img/u);
+  });
+
+  it("does not create a caption for a standalone image without a title", () => {
+    const html = parseMarkdown("![封面](https://example.com/a.jpg)", "default");
+
+    expect(html).toContain("<img");
+    expect(html).not.toContain("text-indent: 0;");
+    expect(html).not.toMatch(/<p[^>]*>\s*<img/u);
   });
 
   it("renders link with optional title", () => {
@@ -165,4 +176,47 @@ describe("parseMarkdown", () => {
     expect(html).toContain("<blockquote");
     expect(html).toContain("我的车明明还有 30% 的电，怎么突然就报警停机了？");
   });
+  it("renders publisher theme highlights, dividers, image styling and custom list tokens", () => {
+    const md = [
+      "==黄色高亮== ++蓝色高亮++ %%粉色高亮%% &&绿色高亮&&",
+      "",
+      "!!红色强调!! @@蓝色强调@@ ^^橙色强调^^",
+      "",
+      "[SEC]",
+      "",
+      "1. 第一项",
+      "2. 第二项",
+      "",
+      "- 无序项",
+      "",
+      "![示例](https://example.com/theme.jpg)"
+    ].join("\n");
+    const html = parseMarkdown(md, "ink-wash");
+
+    expect(html).toContain("山  水  间");
+    expect(html).toContain("background: #8b2a1f");
+    expect(html).toContain("一");
+    expect(html).toContain("※");
+    expect(html).toContain("https://example.com/theme.jpg");
+    expect(html).toContain("border-radius: 2px");
+    expect(html).not.toContain("==黄色高亮==");
+    expect(html).not.toContain("!!红色强调!!");
+  });
+
+  it("does not treat theme hex colors as WeChat topics", () => {
+    const html = parseMarkdown("**重点** ==高亮== #真实话题", "ink-wash");
+
+    expect(html).toContain("color: #8b2a1f");
+    expect(html).toContain("background: #f4e7b8");
+    expect(html.match(/class=\"wx_topic_link\"/g)).toHaveLength(1);
+    expect(html).toContain(">#真实话题</a>");
+  });
+
+  it("keeps code spans isolated from publisher highlight markers", () => {
+    const html = parseMarkdown("`==not highlighted==` 和 ==highlighted==", "refined-blue");
+
+    expect(html).toContain(">==not highlighted==</code>");
+    expect(html).toContain(">highlighted</span>");
+  });
+
 });

@@ -1,7 +1,7 @@
 import { parseMarkdown } from "./markdown.js";
 import { saveHtmlCache } from "./cache.js";
 import { openFileInBrowser } from "./browser.js";
-import { THEME_NAMES, THEMES, type FontSizePreset } from "./themes.js";
+import { THEME_METADATA, THEME_NAMES, THEMES, type FontSizePreset } from "./themes.js";
 import { readFile } from "node:fs/promises";
 import { basename, dirname, extname, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -29,13 +29,10 @@ export function listThemesPayload(): {
   themes: Array<{ name: string; description: string }>;
 } {
   return {
-    themes: [
-      { name: "default", description: "Balanced enterprise style" },
-      { name: "tech", description: "Clean technical publication style" },
-      { name: "warm", description: "Warmer brand/media style" },
-      { name: "apple", description: "Apple-like minimalist editorial style" },
-      { name: "wechat-native", description: "WeChat native-like green visual style" }
-    ]
+    themes: THEME_METADATA.map(({ name, description, category, source }) => ({
+      name,
+      description: `${description} · ${category} · ${source === "classic" ? "经典主题" : "Publisher 主题包"}`
+    }))
   };
 }
 

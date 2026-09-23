@@ -13,7 +13,7 @@ export function inlineFormat(text: string, theme: Theme): string {
   const placeholders = new Map<string, string>();
 
   const stash = (val: string): string => {
-    const key = `@@P${placeholders.size}@@`;
+    const key = `\uE000${placeholders.size}\uE001`;
     placeholders.set(key, val);
     return key;
   };
@@ -30,7 +30,7 @@ export function inlineFormat(text: string, theme: Theme): string {
     (_m, alt: string, src: string, t1?: string, t2?: string, t3?: string, t4?: string) => {
       const title = t1 ?? t2 ?? t3 ?? t4;
       const titleAttr = title ? ` title=\"${title}\"` : "";
-      return stash(`<img src=\"${src}\" alt=\"${alt}\"${titleAttr} style=\"max-width:100%;height:auto;display:block;margin:0.8em auto;\" />`);
+      return stash(`<img src=\"${src}\" alt=\"${alt}\"${titleAttr} style=\"${theme.img}\" />`);
     }
   );
 
@@ -43,6 +43,31 @@ export function inlineFormat(text: string, theme: Theme): string {
     }
   );
 
+  // Convert user-authored topics before injecting styled markup. Otherwise hex
+  // colors inside generated style attributes (for example #1a1a1a) can be
+  // mistaken for topics and corrupt the HTML.
+  escaped = escaped.replace(
+    /(^|[^\p{L}\p{N}_#-])#\s*([\p{L}\p{N}_-]+)/gu,
+    (_m, prefix: string, topic: string) =>
+      `${prefix}<span leaf=\"\"><a class=\"wx_topic_link\" data-topic=\"1\" data-recommend=\"\" href=\"javascript:;\">#${topic}</a> </span>`
+  );
+
+  const highlightPatterns: Array<[RegExp, keyof Theme["highlights"]]> = [
+    [/==([^=\n]+)==/g, "hl_yellow"],
+    [/\+\+([^+\n]+)\+\+/g, "hl_blue"],
+    [/%%([^%\n]+)%%/g, "hl_pink"],
+    [/&amp;&amp;([^&\n]+)&amp;&amp;/g, "hl_green"],
+    [/!!([^!\n]+)!!/g, "em_red"],
+    [/@@([^@\n]+)@@/g, "em_blue"],
+    [/\^\^([^\^\n]+)\^\^/g, "em_orange"]
+  ];
+
+  for (const [pattern, styleName] of highlightPatterns) {
+    escaped = escaped.replace(pattern, (_m, content: string) => {
+      return `<span style=\"${theme.highlights[styleName]}\">${content}</span>`;
+    });
+  }
+
   escaped = escaped.replace(/\*\*([^*]+)\*\*/g, (_m, content: string) => {
     return `<strong style=\"${theme.strong}\">${content}</strong>`;
   });
@@ -51,19 +76,72 @@ export function inlineFormat(text: string, theme: Theme): string {
     return `<em style=\"${theme.em}\">${content}</em>`;
   });
 
-  // WeChat recognizes this exact anchor shape as a topic quick-insert. Keep the
-  // topic marker in the visible text so the editor can bind it to the topic.
-  escaped = escaped.replace(
-    /(^|[^\p{L}\p{N}_#-])#\s*([\p{L}\p{N}_-]+)/gu,
-    (_m, prefix: string, topic: string) =>
-      `${prefix}<span leaf=\"\"><a class=\"wx_topic_link\" data-topic=\"1\" data-recommend=\"\" href=\"javascript:;\">#${topic}</a> </span>`
-  );
-
   for (const [key, value] of placeholders) {
     escaped = escaped.replaceAll(key, value);
   }
 
   return escaped;
+}
+
+const ORDERED_NUMBER_SETS: Record<string, string[]> = {
+  chinese: ["", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十"],
+  roman_upper: ["", "Ⅰ", "Ⅱ", "Ⅲ", "Ⅳ", "Ⅴ", "Ⅵ", "Ⅶ", "Ⅷ", "Ⅸ", "Ⅹ"],
+  roman_lower: ["", "i", "ii", "iii", "iv", "v", "vi", "vii", "viii", "ix", "x"],
+  circled: ["", "①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩"],
+  circled_filled: ["", "❶", "❷", "❸", "❹", "❺", "❻", "❼", "❽", "❾", "❿"]
+};
+
+function formatOrderedNumber(value: number, format: Theme["list_style"]["num_formatter"]): string {
+  if (format === "padded") {
+    return String(value).padStart(2, "0");
+  }
+  if (format === "decimal") {
+    return String(value);
+  }
+  return ORDERED_NUMBER_SETS[format]?.[value] ?? String(value);
+}
+
+function renderListToken(theme: Theme, type: "ul" | "ol", index: number): string {
+  if (type === "ul") {
+    return `<span style=\"${theme.list_style.bullet_container}\">${escapeHtml(theme.list_style.bullet_char || " ")}</span>`;
+  }
+
+  const number = formatOrderedNumber(index, theme.list_style.num_formatter);
+  const label = `${theme.list_style.num_prefix}${number}${theme.list_style.num_suffix}`;
+  return `<span style=\"${theme.list_style.num_container}\">${escapeHtml(label)}</span>`;
+}
+
+
+type StandaloneImage = {
+  alt: string;
+  src: string;
+  title?: string;
+};
+
+function parseStandaloneImage(line: string): StandaloneImage | undefined {
+  const match = line.trim().match(
+    /^!\[([^\]]*)\]\(((?:https?:\/\/|file:\/\/|\/|\.\.?\/)[^\s)]+)(?:\s+(?:"([^"]+)"|'([^']+)'))?\)$/u
+  );
+  if (!match) {
+    return undefined;
+  }
+
+  return {
+    alt: match[1] ?? "",
+    src: match[2] ?? "",
+    title: match[3] ?? match[4]
+  };
+}
+
+function renderStandaloneImage(image: StandaloneImage, theme: Theme): string {
+  const titleAttr = image.title ? ` title=\"${escapeHtml(image.title)}\"` : "";
+  const imageHtml = `<img src=\"${escapeHtml(image.src)}\" alt=\"${escapeHtml(image.alt)}\"${titleAttr} style=\"${theme.img}\" />`;
+  if (!image.title) {
+    return imageHtml;
+  }
+
+  const captionStyle = `${theme.p} margin: -0.35em 0 1.25em; color: #6b7280; font-size: 0.86em; line-height: 1.6; text-align: center; text-indent: 0; font-weight: 400;`;
+  return `${imageHtml}\n<p style=\"${captionStyle}\">${escapeHtml(image.title)}</p>`;
 }
 
 function splitTableRow(line: string): string[] {
@@ -127,13 +205,19 @@ export function parseMarkdown(md: string, themeName = "default", title?: string,
 
   const flushList = (): void => {
     if (listType && listItems.length > 0) {
-      const renderedItems = listItems.map((item) => `<li style=\"${theme.li}\">${item}</li>`).join("");
-      if (listType === "ol") {
+      const activeListType = listType;
+      const renderedItems = listItems
+        .map((item, index) => {
+          const number = activeListType === "ol" ? olStart + index : index + 1;
+          return `<li style=\"${theme.li} list-style: none;\">${renderListToken(theme, activeListType, number)}${item}</li>`;
+        })
+        .join("");
+      if (activeListType === "ol") {
         const startAttr = olStart !== 1 ? ` start=\"${olStart}\"` : "";
-        out.push(`<ol${startAttr} style=\"margin: 0.6em 0 0.9em 1.2em; padding: 0;\">${renderedItems}</ol>`);
+        out.push(`<ol${startAttr} style=\"${theme.ol}\">${renderedItems}</ol>`);
         olNextExpected = olStart + listItems.length;
       } else {
-        out.push(`<ul style=\"margin: 0.6em 0 0.9em 1.2em; padding: 0;\">${renderedItems}</ul>`);
+        out.push(`<ul style=\"${theme.ul}\">${renderedItems}</ul>`);
         olNextExpected = undefined;
       }
     }
@@ -201,7 +285,14 @@ export function parseMarkdown(md: string, themeName = "default", title?: string,
       continue;
     }
 
-    if (/^(-{3,}|\*{3,})$/u.test(line.trim())) {
+    if (/^(={3,}|~{3,}|\[SEC\])$/u.test(line.trim())) {
+      flushParagraph();
+      flushList();
+      out.push(`<p style=\"${theme.section_divider}\">${escapeHtml(theme.section_divider_text)}</p>`);
+      continue;
+    }
+
+    if (/^(-{3,}|\*{3,}|_{3,})$/u.test(line.trim())) {
       flushParagraph();
       flushList();
       out.push(`<hr style=\"${theme.hr}\" />`);
@@ -213,6 +304,14 @@ export function parseMarkdown(md: string, themeName = "default", title?: string,
       flushParagraph();
       flushList();
       out.push(`<blockquote style=\"${theme.blockquote}\">${inlineFormat(quote[1] ?? "", theme)}</blockquote>`);
+      continue;
+    }
+
+    const standaloneImage = parseStandaloneImage(line);
+    if (standaloneImage) {
+      flushParagraph();
+      flushList();
+      out.push(renderStandaloneImage(standaloneImage, theme));
       continue;
     }
 

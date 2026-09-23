@@ -11,7 +11,8 @@
     "start": "node dist/server.js",
     "test:watch": "vitest",
     "build:check": "tsc -p tsconfig.build.json --noEmit",
-    "prepack": "npm run build && chmod +x dist/server.js dist/cli.js dist/browser.js"
+    "prepack": "npm run build && chmod +x dist/server.js dist/cli.js dist/browser.js",
+    "gallery": "node dist/theme-gallery.js"
   },
   "keywords": [],
   "author": "",

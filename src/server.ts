@@ -5,12 +5,13 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import { handleToolCall } from "./tools.js";
+import { THEME_NAMES } from "./themes.js";
 import pkg from "../package.json" with { type: "json" };
 
 const SERVER_NAME = pkg.name;
 const SERVER_VERSION = pkg.version;
 
-const themeSchema = z.enum(["default", "tech", "warm", "apple", "wechat-native"]);
+const themeSchema = z.enum(THEME_NAMES as [string, ...string[]]);
 const fontSizePresetSchema = z.enum(["small", "medium", "large"]);
 
 const SERVER_INSTRUCTIONS = `
@@ -80,7 +81,7 @@ export function createServer(): McpServer {
       inputSchema: {
         markdown: z.string().optional().describe("Source markdown text. If both markdown and markdown_path are provided, markdown is used."),
         markdown_path: z.string().optional().describe("Local markdown file path. Use this to avoid sending full content through tokens."),
-        theme: themeSchema.optional().default("default").describe("Theme name: default | tech | warm | apple | wechat-native"),
+        theme: themeSchema.optional().default("default").describe(`Theme name. Available: ${THEME_NAMES.join(" | ")}`),
         font_size_preset: fontSizePresetSchema.optional().default("medium").describe("Font size preset: small | medium | large"),
         access_token: z.string().optional().describe("WeChat API access token. When provided, local images referenced as ![alt](./path) are automatically uploaded to WeChat CDN and replaced with permanent URLs.")
       }
@@ -160,7 +161,7 @@ export function createServer(): McpServer {
         article_title: z.string().optional().describe("Draft article title. Fallback: first markdown H1, then markdown file name."),
         markdown: z.string().optional().describe("Source markdown text. If both markdown and markdown_path are provided, markdown is used."),
         markdown_path: z.string().optional().describe("Local markdown file path"),
-        theme: themeSchema.optional().default("default").describe("Theme name: default | tech | warm | apple | wechat-native"),
+        theme: themeSchema.optional().default("default").describe(`Theme name. Available: ${THEME_NAMES.join(" | ")}`),
         font_size_preset: fontSizePresetSchema.optional().default("medium").describe("Font size preset: small | medium | large"),
         thumb_media_id: z.string().optional().describe("Optional explicit thumb media id override."),
         author: z.string().optional().describe("Author name"),

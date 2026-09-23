@@ -64,13 +64,37 @@ node dist/cli.js ./input.md --theme default
 }
 ```
 
+## 主题系统
+
+当前共支持 **20 套主题**：
+
+- 经典主题：`default`、`tech`、`warm`、`apple`、`wechat-native`
+- Publisher 适配：`academic-paper`、`business-navy`、`elegant-ink`、`girly-pink`、`ink-wash`、`magazine-grid`、`minimal-bw`、`minimal-mono`、`mint-fresh`、`news-bold`、`refined-blue`、`sage-premium`、`sunset-coral`、`warm-editorial`、`warm-orange`
+
+全部 20 套主题均使用统一 JSON 结构并保存在 `assets/themes/`；其中 Publisher 主题的来源与固定 commit 见 `assets/themes/README.md`。运行时会做以下 MCP / 微信兼容调优：
+
+- 将 `body` 映射为移动端安全的 `<article>` 容器
+- 将 `code_block` 映射为可换行的 `<pre>`，避免手机端横向溢出
+- 应用主题自己的图片、表格、分节符和有序/无序列表视觉
+- 支持主题高亮语法：`==黄==`、`++蓝++`、`%%粉%%`、`&&绿&&`、`!!红色强调!!`、`@@蓝色强调@@`、`^^橙色强调^^`
+- 支持 `[SEC]`、`===`、`~~~` 作为主题化分节符
+
+生成并查看全部主题的对比图鉴：
+
+```bash
+npm run gallery
+open theme-gallery.html   # macOS
+```
+
+生成文件 `theme-gallery.html` 包含搜索、来源筛选、分类筛选和 20 套独立滚动的文章样张。
+
 ## 工具参数
 
 ### 1) `convert_markdown_to_wechat_html`
 输入：
 - `markdown` (string, optional): 直接传 Markdown 内容
 - `markdown_path` (string, optional): 传本地 Markdown 文件路径（避免整篇内容走 token）
-- `theme` (string, optional): `default | tech | warm | apple | wechat-native`
+- `theme` (string, optional): 主题名，支持 5 个经典主题与 15 个 Publisher 适配主题（见下方“主题系统”）
 - `title` (string, optional)
 - `font_size_preset` (string, optional, default `medium`): `small | medium | large`
 - `access_token` (string, optional): 传入后会自动上传本地图片并替换为微信 URL

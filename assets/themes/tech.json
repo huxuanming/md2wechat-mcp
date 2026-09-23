@@ -1,0 +1,60 @@
+{
+  "theme_name": "tech",
+  "description": "经典科技 - 冷色边界与青蓝强调，结构理性、代码感明确，适合工程 / 教程 / 开发内容",
+  "category": "技术 / 工程",
+  "source": "classic",
+  "styles": {
+    "body": "font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', sans-serif; font-size: 16px; color: #0f172a; line-height: 1.82; letter-spacing: 0.2px; padding: 14px 12px; background: #ffffff;",
+    "h1": "font-size: 22px; line-height: 1.36; margin: 32px 0 18px; padding-bottom: 11px; color: #111827; font-weight: 800; border-bottom: 3px solid #0ea5e9;",
+    "h2": "font-size: 18px; line-height: 1.45; margin: 32px 0 16px; color: #111827; font-weight: 750; border-bottom: 2px solid #0ea5e9; padding-bottom: 6px;",
+    "h3": "font-size: 16px; line-height: 1.5; margin: 25px 0 11px; color: #0f172a; font-weight: 700; font-family: 'SFMono-Regular', Menlo, Consolas, monospace;",
+    "p": "margin: 0 0 16px; font-size: 16px; line-height: 1.82; color: #0f172a;",
+    "blockquote": "margin: 22px 0; padding: 16px 18px; color: #164e63; background: #ecfeff; border: 1px solid #bae6fd; border-left: 3px solid #0ea5e9; border-radius: 4px; font-size: 14px; line-height: 1.78;",
+    "img": "max-width: 100%; height: auto; border-radius: 6px; margin: 22px auto; display: block; border: 1px solid #cbd5e1; box-shadow: 0 8px 20px rgba(14,165,233,0.08);",
+    "strong": "font-weight: 700; color: #1d4ed8;",
+    "em": "font-style: italic; color: #0c4a6e;",
+    "code_inline": "font-family: Menlo, Consolas, monospace; font-size: 0.92em; background: #eef2ff; color: #1e3a8a; padding: 0.1em 0.34em; border-radius: 4px;",
+    "code_block": "margin: 1em 0; padding: 1em; background: #0f172a; color: #dbeafe; border-radius: 8px; overflow-x: auto; line-height: 1.58;",
+    "ul": "margin: 16px 0; padding: 0; list-style: none;",
+    "ol": "margin: 16px 0; padding: 0; list-style: none;",
+    "li": "margin: 8px 0; line-height: 1.78; color: #0f172a;",
+    "li_bullet": "display: inline-block; min-width: 16px; margin-right: 8px; color: #0ea5e9; font-family: 'SFMono-Regular', Menlo, Consolas, monospace; font-size: 15px; font-weight: 900;",
+    "li_bullet_char": "›",
+    "li_number": "display: inline-block; min-width: 34px; margin-right: 9px; color: #0369a1; font-family: 'SFMono-Regular', Menlo, Consolas, monospace; font-size: 12px; font-weight: 800;",
+    "hr": "border: none; border-top: 1px solid #cbd5e1; margin: 1.15em 0;",
+    "a": "color: #0369a1; text-decoration: none; border-bottom: 1px solid #7dd3fc;",
+    "table": "width: 100%; border-collapse: collapse; margin: 22px 0; font-size: 13.5px; border: 1px solid #cbd5e1; table-layout: fixed; word-break: break-word;",
+    "th": "border: 1px solid #cbd5e1; padding: 9px 10px; background: #f0f9ff; color: #075985; text-align: left; font-weight: 700;",
+    "td": "border: 1px solid #cbd5e1; padding: 9px 10px; color: #1e293b; vertical-align: top; line-height: 1.6;",
+    "caption": "font-size: 12.5px; color: #7a7f87; text-align: center; margin-top: 9px; line-height: 1.6;",
+    "section_divider": "text-align: center; color: #0ea5e9; letter-spacing: 6px; font-size: 11px; margin: 34px 0; user-select: none; font-family: 'SFMono-Regular', Menlo, Consolas, monospace; opacity: 0.75;"
+  },
+  "highlights": {
+    "hl_yellow": "background: #fef3c7; color: #713f12; padding: 2px 7px; border-radius: 3px; font-weight: 600;",
+    "hl_blue": "background: #e0f2fe; color: #075985; padding: 2px 7px; border-radius: 3px; font-weight: 600;",
+    "hl_pink": "background: #fce7f3; color: #9d174d; padding: 2px 7px; border-radius: 3px; font-weight: 500;",
+    "hl_green": "background: #dcfce7; color: #166534; padding: 2px 7px; border-radius: 3px; font-weight: 500;",
+    "em_red": "color: #dc2626; font-weight: 700;",
+    "em_blue": "color: #0284c7; font-weight: 700;",
+    "em_orange": "color: #ea580c; font-weight: 700;"
+  },
+  "section_divider_text": "</>  </>  </>",
+  "code_colors": {
+    "kw": "color: #7dd3fc; font-weight: 600;",
+    "str": "color: #86efac;",
+    "num": "color: #fda4af;",
+    "fn": "color: #c4b5fd;",
+    "cls": "color: #67e8f9;",
+    "comm": "color: #64748b; font-style: italic;",
+    "punct": "color: #cbd5e1;"
+  },
+  "list_style": {
+    "label": "终端方括号序号",
+    "num_container": "display: inline-block; min-width: 34px; margin-right: 9px; color: #0369a1; font-family: 'SFMono-Regular', Menlo, Consolas, monospace; font-size: 12px; font-weight: 800;",
+    "num_prefix": "[",
+    "num_suffix": "]",
+    "num_formatter": "padded",
+    "bullet_container": "display: inline-block; min-width: 16px; margin-right: 8px; color: #0ea5e9; font-family: 'SFMono-Regular', Menlo, Consolas, monospace; font-size: 15px; font-weight: 900;",
+    "bullet_char": "›"
+  }
+}

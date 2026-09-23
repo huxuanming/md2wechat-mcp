@@ -1,0 +1,60 @@
+{
+  "theme_name": "warm",
+  "description": "经典暖调 - 暖棕与橙色点缀，亲切自然、叙事感温和，适合生活 / 品牌 / 经验分享",
+  "category": "生活 / 品牌",
+  "source": "classic",
+  "styles": {
+    "body": "font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', sans-serif; font-size: 16px; color: #3b2f2f; line-height: 1.86; letter-spacing: 0.25px; padding: 15px 13px; background: #fffdf9;",
+    "h1": "font-size: 22px; line-height: 1.38; margin: 34px 0 18px; padding-bottom: 10px; color: #5f2d1b; font-weight: 800; border-bottom: 2px solid #d97706;",
+    "h2": "font-size: 18px; line-height: 1.46; margin: 32px 0 16px; color: #7a3118; font-weight: 750; border-left: 4px solid #d97706; padding: 7px 0 7px 12px; background: linear-gradient(90deg, #fff3df 0%, #fffdf9 78%);",
+    "h3": "font-size: 16px; line-height: 1.5; margin: 26px 0 12px; color: #8a3d1f; font-weight: 700;",
+    "p": "margin: 0 0 17px; font-size: 16px; line-height: 1.86; color: #3b2f2f; text-align: justify;",
+    "blockquote": "margin: 22px 0; padding: 17px 19px; color: #7a3118; background: #fff4e5; border: 1px solid #f6d8b6; border-left: 3px solid #d97706; border-radius: 0 10px 10px 0; font-size: 14.5px; line-height: 1.82;",
+    "img": "max-width: 100%; height: auto; border-radius: 10px; margin: 23px auto; display: block; border: 1px solid #f3d3b0; box-shadow: 0 7px 20px rgba(180,83,9,0.10);",
+    "strong": "font-weight: 700; color: #9a3412;",
+    "em": "font-style: italic; color: #92400e;",
+    "code_inline": "font-family: Menlo, Consolas, monospace; font-size: 0.92em; background: #fff3e0; color: #7c2d12; padding: 0.1em 0.34em; border-radius: 4px;",
+    "code_block": "margin: 1em 0; padding: 1em; background: #402217; color: #fdecd6; border-radius: 8px; overflow-x: auto; line-height: 1.6;",
+    "ul": "margin: 17px 0; padding: 0; list-style: none;",
+    "ol": "margin: 17px 0; padding: 0; list-style: none;",
+    "li": "margin: 9px 0; line-height: 1.82; color: #3b2f2f;",
+    "li_bullet": "display: inline-block; min-width: 16px; margin-right: 9px; color: #d97706; font-size: 13px; font-weight: 900;",
+    "li_bullet_char": "✦",
+    "li_number": "display: inline-block; min-width: 25px; margin-right: 9px; color: #b45309; font-size: 17px; font-weight: 800; line-height: 1; vertical-align: -1px;",
+    "hr": "border: none; border-top: 1px solid #f3d3b0; margin: 1.2em 0;",
+    "a": "color: #b45309; text-decoration: none; border-bottom: 1px solid #f2b874;",
+    "table": "width: 100%; border-collapse: collapse; margin: 22px 0; font-size: 14px; border: 1px solid #f0cfaa; table-layout: fixed; word-break: break-word;",
+    "th": "border: 1px solid #f0cfaa; padding: 9px 10px; background: #fff0dc; color: #7a3118; text-align: left; font-weight: 700;",
+    "td": "border: 1px solid #f0cfaa; padding: 9px 10px; color: #4b3631; vertical-align: top; line-height: 1.62;",
+    "caption": "font-size: 12.5px; color: #7a7f87; text-align: center; margin-top: 9px; line-height: 1.6;",
+    "section_divider": "text-align: center; color: #d97706; letter-spacing: 10px; font-size: 12px; margin: 36px 0; user-select: none; opacity: 0.65;"
+  },
+  "highlights": {
+    "hl_yellow": "background: linear-gradient(180deg, transparent 55%, #ffe29a 55%); color: #5f2d1b; padding: 0 3px; font-weight: 600;",
+    "hl_blue": "background: #e6eef6; color: #365f7d; padding: 2px 7px; border-radius: 5px; font-weight: 500;",
+    "hl_pink": "background: #f8ddd8; color: #9b4033; padding: 2px 7px; border-radius: 5px; font-weight: 500;",
+    "hl_green": "background: #e3edd7; color: #3e5622; padding: 2px 7px; border-radius: 5px; font-weight: 500;",
+    "em_red": "color: #b83e2e; font-weight: 700;",
+    "em_blue": "color: #396a8d; font-weight: 700;",
+    "em_orange": "color: #b45309; font-weight: 800;"
+  },
+  "section_divider_text": "✦  ✦  ✦",
+  "code_colors": {
+    "kw": "color: #fdba74; font-weight: 600;",
+    "str": "color: #fde68a;",
+    "num": "color: #fca5a5;",
+    "fn": "color: #fed7aa;",
+    "cls": "color: #f9a8d4;",
+    "comm": "color: #a78b7a; font-style: italic;",
+    "punct": "color: #f5e7dc;"
+  },
+  "list_style": {
+    "label": "暖橙圈号",
+    "num_container": "display: inline-block; min-width: 25px; margin-right: 9px; color: #b45309; font-size: 17px; font-weight: 800; line-height: 1; vertical-align: -1px;",
+    "num_prefix": "",
+    "num_suffix": "",
+    "num_formatter": "circled",
+    "bullet_container": "display: inline-block; min-width: 16px; margin-right: 9px; color: #d97706; font-size: 13px; font-weight: 900;",
+    "bullet_char": "✦"
+  }
+}
