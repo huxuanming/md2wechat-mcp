@@ -121,13 +121,13 @@ describe("theme registry", () => {
     }
   });
 
-  it("keeps every theme image flush for consecutive comic panels", () => {
+  it("keeps every theme image style free of shadows, borders and spacing", () => {
     for (const metadata of THEME_METADATA) {
       const imageStyle = resolveTheme(metadata.name).img;
       expect(imageStyle).toContain("max-width: 100%");
       expect(imageStyle).toContain("height: auto");
       expect(imageStyle).toContain("display: block");
-      expect(imageStyle).not.toMatch(/(?:^|;)\s*(?:border|margin|border-radius)\s*:/u);
+      expect(imageStyle).not.toMatch(/(?:^|;)\s*(?:border|margin|border-radius|box-shadow)\s*:/u);
     }
   });
 

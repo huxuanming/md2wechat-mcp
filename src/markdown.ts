@@ -144,6 +144,11 @@ function renderStandaloneImage(image: StandaloneImage, theme: Theme): string {
   return `${imageHtml}\n<p style=\"${captionStyle}\">${escapeHtml(image.title)}</p>`;
 }
 
+function renderComicImageGroup(images: StandaloneImage[], theme: Theme): string {
+  const imageHtml = images.map((image) => renderStandaloneImage(image, theme)).join("");
+  return `<div style=\"display: block; margin: 0; padding: 0; font-size: 0; line-height: 0;\">${imageHtml}</div>`;
+}
+
 function splitTableRow(line: string): string[] {
   const trimmed = line.trim();
   const normalized = trimmed.replace(/^\|/, "").replace(/\|$/, "");
@@ -311,7 +316,25 @@ export function parseMarkdown(md: string, themeName = "default", title?: string,
     if (standaloneImage) {
       flushParagraph();
       flushList();
-      out.push(renderStandaloneImage(standaloneImage, theme));
+
+      const comicImages = standaloneImage.title ? [] : [standaloneImage];
+      if (comicImages.length > 0) {
+        let nextIndex = i + 1;
+        while (nextIndex < lines.length) {
+          const nextLine = (lines[nextIndex] ?? "").replace(/\s+$/u, "");
+          const nextImage = parseStandaloneImage(nextLine);
+          if (!nextImage || nextImage.title) break;
+          comicImages.push(nextImage);
+          nextIndex += 1;
+        }
+      }
+
+      if (comicImages.length > 1) {
+        out.push(renderComicImageGroup(comicImages, theme));
+        i += comicImages.length - 1;
+      } else {
+        out.push(renderStandaloneImage(standaloneImage, theme));
+      }
       continue;
     }
 

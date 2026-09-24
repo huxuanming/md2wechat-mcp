@@ -124,18 +124,18 @@ describe("parseMarkdown", () => {
   });
 
 
-  it("renders consecutive comic images without theme spacing, borders or rounded corners", () => {
+  it("wraps consecutive comic images in one zero-line-height div", () => {
     const html = parseMarkdown(
       ["![第一格](https://example.com/1.jpg)", "![第二格](https://example.com/2.jpg)"].join("\n"),
-      "minimal-mono"
+      "wechat-native"
     );
 
     expect(html.match(/<img\b/gu)).toHaveLength(2);
-    expect(html).toMatch(/<img[^>]+1\.jpg[^>]*\/>\n<img[^>]+2\.jpg[^>]*\/>/u);
+    expect(html).toMatch(/<div[^>]*font-size: 0; line-height: 0;[^>]*><img[^>]+1\.jpg[^>]*\/><img[^>]+2\.jpg[^>]*\/><\/div>/u);
     const imageStyles = [...html.matchAll(/<img[^>]*style="([^"]*)"/gu)].map((match) => match[1] ?? "");
     expect(imageStyles).toHaveLength(2);
     for (const imageStyle of imageStyles) {
-      expect(imageStyle).not.toMatch(/(?:^|;)\s*(?:border|margin|border-radius)\s*:/u);
+      expect(imageStyle).not.toMatch(/box-shadow\s*:/u);
     }
   });
 
