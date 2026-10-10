@@ -41,5 +41,13 @@
     "tsx": "^4.21.0",
     "typescript": "^6.0.2",
     "vitest": "^4.1.3"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/huxuanming/md2wechat-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/huxuanming/md2wechat-mcp/issues"
+  },
+  "homepage": "https://github.com/huxuanming/md2wechat-mcp#readme"
 }
