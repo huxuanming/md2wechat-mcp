@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write   # 用于创建 GitHub Release
-      id-token: write   # 用于 npm provenance 来源签名认证
+      id-token: write
 
     steps:
       - name: Checkout code
@@ -71,7 +71,8 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          npm publish --access public --provenance
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
+          npm publish --access public
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/')
