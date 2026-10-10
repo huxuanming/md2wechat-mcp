@@ -1,6 +1,6 @@
 ---
 name: wechat-draft-publish
-description: Use when the user wants to publish a Markdown article (with images) to WeChat Official Account draft box. Covers the full workflow: get token → convert MD to HTML (auto-upload local images) → optionally upload cover → add draft.
+description: "Use when the user wants to publish a Markdown article (with images) to WeChat Official Account draft box. Covers the full workflow: get token → convert MD to HTML (auto-upload local images) → optionally upload cover → add draft."
 ---
 
 # 发布 Markdown 图文到微信公众号草稿箱

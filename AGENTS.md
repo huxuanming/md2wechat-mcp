@@ -5,3 +5,7 @@
 - If a task does not involve code changes, no build is required.
 - During development, run type-check after each code change: `npm run build:check`
 - After completing a task with code changes, run once: `npm run build`
+
+## Skills
+
+- WeChat Draft Publishing: see `.agents/skills/wechat-draft-publish/SKILL.md` for the full workflow of publishing markdown articles with images to WeChat Official Account draft box.

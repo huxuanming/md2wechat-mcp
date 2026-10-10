@@ -3,6 +3,7 @@ src/
 tests/
 .cache/
 .claude
+.agents
 tsconfig.json
 .gitignore
 AGENTS.md

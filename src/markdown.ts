@@ -9,6 +9,11 @@ function escapeHtml(text: string): string {
     .replaceAll("'", "&#39;");
 }
 
+function imageStyle(theme: Theme): string {
+  // Keep all theme image styling except display, which causes comic seams.
+  return theme.img.split(";").filter((declaration) => !/^\s*display\s*:/iu.test(declaration)).join(";");
+}
+
 export function inlineFormat(text: string, theme: Theme): string {
   const placeholders = new Map<string, string>();
 
@@ -30,7 +35,7 @@ export function inlineFormat(text: string, theme: Theme): string {
     (_m, alt: string, src: string, t1?: string, t2?: string, t3?: string, t4?: string) => {
       const title = t1 ?? t2 ?? t3 ?? t4;
       const titleAttr = title ? ` title=\"${title}\"` : "";
-      return stash(`<img src=\"${src}\" alt=\"${alt}\"${titleAttr} style=\"${theme.img}\" />`);
+      return stash(`<img src=\"${src}\" alt=\"${alt}\"${titleAttr} style=\"${imageStyle(theme)}\" />`);
     }
   );
 
@@ -135,7 +140,7 @@ function parseStandaloneImage(line: string): StandaloneImage | undefined {
 
 function renderStandaloneImage(image: StandaloneImage, theme: Theme): string {
   const titleAttr = image.title ? ` title=\"${escapeHtml(image.title)}\"` : "";
-  const imageHtml = `<img src=\"${escapeHtml(image.src)}\" alt=\"${escapeHtml(image.alt)}\"${titleAttr} style=\"${theme.img}\" />`;
+  const imageHtml = `<img src=\"${escapeHtml(image.src)}\" alt=\"${escapeHtml(image.alt)}\"${titleAttr} style=\"${imageStyle(theme)}\" />`;
   if (!image.title) {
     return imageHtml;
   }
@@ -146,7 +151,7 @@ function renderStandaloneImage(image: StandaloneImage, theme: Theme): string {
 
 function renderComicImageGroup(images: StandaloneImage[], theme: Theme): string {
   const imageHtml = images.map((image) => renderStandaloneImage(image, theme)).join("");
-  return `<div style=\"display: block; margin: 0; padding: 0; font-size: 0; line-height: 0;\">${imageHtml}</div>`;
+  return `<div style=\"margin: 0; padding: 0; font-size: 0; line-height: 0;\">${imageHtml}</div>`;
 }
 
 function splitTableRow(line: string): string[] {
@@ -318,20 +323,24 @@ export function parseMarkdown(md: string, themeName = "default", title?: string,
       flushList();
 
       const comicImages = standaloneImage.title ? [] : [standaloneImage];
+      let lastImageIndex = i;
       if (comicImages.length > 0) {
         let nextIndex = i + 1;
         while (nextIndex < lines.length) {
-          const nextLine = (lines[nextIndex] ?? "").replace(/\s+$/u, "");
-          const nextImage = parseStandaloneImage(nextLine);
+          while (nextIndex < lines.length && /^\s*$/u.test(lines[nextIndex] ?? "")) {
+            nextIndex += 1;
+          }
+          const nextImage = parseStandaloneImage(lines[nextIndex] ?? "");
           if (!nextImage || nextImage.title) break;
           comicImages.push(nextImage);
+          lastImageIndex = nextIndex;
           nextIndex += 1;
         }
       }
 
       if (comicImages.length > 1) {
         out.push(renderComicImageGroup(comicImages, theme));
-        i += comicImages.length - 1;
+        i = lastImageIndex;
       } else {
         out.push(renderStandaloneImage(standaloneImage, theme));
       }

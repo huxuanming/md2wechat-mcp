@@ -114,7 +114,8 @@ describe("theme registry", () => {
       if (theme.list_style.bullet_char) {
         expect(html).toContain(`>${escapeText(theme.list_style.bullet_char)}</span>`);
       }
-      expect(html).toContain(theme.img);
+      expect(html).toContain(theme.img.split(";").filter((declaration) => !/^\s*display\s*:/iu.test(declaration)).join(";"));
+      expect(html.match(/<img[^>]*style="([^"]*)"/u)?.[1]).not.toMatch(/(?:^|;)\s*display\s*:/iu);
       expect(html).toContain("<table");
       expect(html).not.toContain("==黄色==");
       expect(html).not.toContain("!!红色!!");
